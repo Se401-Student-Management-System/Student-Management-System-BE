@@ -11,6 +11,11 @@ import com.example.studentmanagement.dto.director.UserRequest;
 import com.example.studentmanagement.service.director.UserService;
 import com.example.studentmanagement.service.director.AccountService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -103,27 +108,29 @@ public class BoardOfDirectorsController {
         return ResponseEntity.ok(response);
     }
 
-     @PostMapping("/create")
-    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
-        try {
-            // B1: Tạo tài khoản (Account)
-            Account account = accountService.createAccount(request);
+    @Operation(summary = "Create a new user", description = "Create a new user based on role and entity type")
+    @ApiResponse(responseCode = "200", description = "Successfully created",
+                 content = @Content(mediaType = "application/json",
+                         schema = @Schema(implementation = Object.class)))
+    @PostMapping("/create")
+public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+    try {
+        // B1: Tạo tài khoản (Account)
+        Account account = accountService.createAccount(request);
 
-            // B2: Lấy factory tương ứng với entityType
-            UserFactory factory = userService.getFactory(request.getEntity());
+        // B2: Lấy factory tương ứng với entityType
+        UserFactory factory = userService.getFactory(request.getEntity());
 
-            // B3: Tạo entity (Cashier, Student,...)
-            factory.create(request, account);
+        // B3: Tạo entity (Student, Teacher, v.v.)
+        Object entity = factory.create(request, account);
 
-            // B4: Lưu entity
-            Object savedEntity = userService.saveEntity(account);
+        // Trả về entity đã tạo
+        return ResponseEntity.ok(entity);
 
-            return ResponseEntity.ok(savedEntity);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
-        }
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
     }
+}
 }

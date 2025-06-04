@@ -1,6 +1,7 @@
 package com.example.studentmanagement.model;
 
 import com.example.studentmanagement.enums.StudyStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,10 +14,12 @@ import lombok.*;
 public class Student {
     @Id
     @Column(length = 10)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "account_id", referencedColumnName = "id")
+    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, unique = true)
+    @JsonIgnoreProperties("student")
     private Account account;
 
     @Column(length = 50)

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRequest {
-    private String id;
     private String username;
     private String password;
     private String email;
@@ -16,7 +15,21 @@ public class UserRequest {
     private String phoneNumber;
     private String address;
     private String gender;
-    private String BirthDate;
-    private String role;
-    private String entity; // (CASHIER, SUPERVISOR, TEACHER, STUDENT,...)
+    private String birthDate;
+    private String roleId;
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
+
+    private String entity;
+    // other fields, constructors, etc.
+
+    public String getEntity() {
+        return entity;
+    }
 }

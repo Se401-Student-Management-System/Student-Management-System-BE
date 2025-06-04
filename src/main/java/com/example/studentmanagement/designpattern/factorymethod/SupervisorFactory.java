@@ -7,7 +7,7 @@ import com.example.studentmanagement.model.Supervisor;
 public class SupervisorFactory implements UserFactory {
     @Override
     public Object create(UserRequest request, Account account) {
-        Supervisor supervisor = new Supervisor(request.getId());
+        Supervisor supervisor = new Supervisor(request.getRoleId());
         supervisor.setAccount(account);
         return supervisor;
     }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "account")
 @Data
@@ -45,6 +47,7 @@ public class Account {
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
+    @JsonIgnoreProperties("accounts")
     private Role role;
 
     public enum Gender {

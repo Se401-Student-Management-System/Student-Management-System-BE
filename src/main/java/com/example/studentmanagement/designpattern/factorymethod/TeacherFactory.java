@@ -7,7 +7,7 @@ import com.example.studentmanagement.model.Teacher;
 public class TeacherFactory implements UserFactory {
     @Override
     public Object create(UserRequest request, Account account) {
-        Teacher Teacher = new Teacher(request.getId());
+        Teacher Teacher = new Teacher(request.getRoleId());
         Teacher.setAccount(account);
         return Teacher;
     }
