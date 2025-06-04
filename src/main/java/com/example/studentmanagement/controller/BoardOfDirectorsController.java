@@ -5,6 +5,11 @@ import com.example.studentmanagement.designpattern.facade.StudentManagementFacad
 import com.example.studentmanagement.dto.director.SchoolRecord;
 import com.example.studentmanagement.dto.director.StudentPaymentDTO;
 import com.example.studentmanagement.service.director.StudentPaymentService;
+import com.example.studentmanagement.designpattern.factorymethod.UserFactory;
+import com.example.studentmanagement.model.Account;
+import com.example.studentmanagement.dto.director.UserRequest;
+import com.example.studentmanagement.service.director.UserService;
+import com.example.studentmanagement.service.director.AccountService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +25,16 @@ public class BoardOfDirectorsController {
 
     private final SchoolRecordDirector director;
     private final StudentManagementFacade facade;
+    private final UserService userService;
+    private final AccountService accountService;
     @Autowired
     private StudentPaymentService studentPaymentService;
 
-    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade) {
+    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade, UserService userService, AccountService accountService) {
         this.director = director;
         this.facade = facade;
+        this.userService = userService;
+        this.accountService = accountService;
     }
 
     @GetMapping("/school-record")
@@ -92,5 +101,29 @@ public class BoardOfDirectorsController {
         response.put("selectedClass", selectedClass);
 
         return ResponseEntity.ok(response);
+    }
+
+     @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+        try {
+            // B1: Tạo tài khoản (Account)
+            Account account = accountService.createAccount(request);
+
+            // B2: Lấy factory tương ứng với entityType
+            UserFactory factory = userService.getFactory(request.getEntity());
+
+            // B3: Tạo entity (Cashier, Student,...)
+            factory.create(request, account);
+
+            // B4: Lưu entity
+            Object savedEntity = userService.saveEntity(account);
+
+            return ResponseEntity.ok(savedEntity);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        }
     }
 }

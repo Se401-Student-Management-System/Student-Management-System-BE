@@ -30,6 +30,16 @@
             "projectName": "Student-Management-System-BE",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-StudentManagementApplication<studentmanagement-Student-Management-System-BE>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.studentmanagement.StudentManagementApplication",
+            "projectName": "studentmanagement-Student-Management-System-BE",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

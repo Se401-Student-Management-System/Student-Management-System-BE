@@ -11,7 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
-
     @Id
     @Column(length = 10)
     private String id;
@@ -26,7 +25,12 @@ public class Student {
     @Column(name = "birth_place", length = 100)
     private String birthPlace;
     
-    @Column(length = 20)
-    private String status; // Thêm cột này
-}
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private StudyStatus status;
 
+    public Student(String id) {
+        this.id = id;
+        this.status = StudyStatus.ACTIVE;
+    }
+}
