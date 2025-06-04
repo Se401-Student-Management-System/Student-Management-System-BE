@@ -67,8 +67,7 @@ public class StudentNumberStatics {
         stats.put("change", Math.round(calculatePercentageChange(currentEnrolled, previousEnrolled) * 100.0) / 100.0);
         return stats;
     }
-    // Hàm này có thể thay đổi theo status của học sinh
-    // Nếu status là "ACTIVE" thì có thể dùng hàm này
+
     public long getActiveStudents(int grade, String academicYear) {
         try {
             String sql = "SELECT COUNT(DISTINCT s.id) FROM student s " +
@@ -145,11 +144,25 @@ public class StudentNumberStatics {
                          "GROUP BY sc.academic_year";
             @SuppressWarnings("unchecked")
             List<Object[]> results = entityManager.createNativeQuery(sql).getResultList();
-            return results.stream()
+            Map<String, String> history = results.stream()
                     .collect(Collectors.toMap(
                             row -> row[0].toString(),
                             row -> row[1].toString()
                     ));
+
+            // Lấy danh sách tất cả các năm học từ database
+            String yearsSql = "SELECT DISTINCT academic_year FROM student_class ORDER BY academic_year";
+            @SuppressWarnings("unchecked")
+            List<String> allYears = entityManager.createNativeQuery(yearsSql).getResultList();
+
+            // Đảm bảo tất cả các năm học có trong history, nếu không có dữ liệu thì đặt là 0
+            for (String year : allYears) {
+                if (!history.containsKey(year)) {
+                    history.put(year, "0");
+                }
+            }
+
+            return history;
         } catch (Exception e) {
             return new HashMap<>();
         }
@@ -162,11 +175,25 @@ public class StudentNumberStatics {
                          "GROUP BY b.academic_year";
             @SuppressWarnings("unchecked")
             List<Object[]> results = entityManager.createNativeQuery(sql).getResultList();
-            return results.stream()
+            Map<String, String> history = results.stream()
                     .collect(Collectors.toMap(
                             row -> row[0].toString(),
                             row -> row[1].toString()
                     ));
+
+            // Lấy danh sách tất cả các năm học từ database
+            String yearsSql = "SELECT DISTINCT academic_year FROM student_class ORDER BY academic_year";
+            @SuppressWarnings("unchecked")
+            List<String> allYears = entityManager.createNativeQuery(yearsSql).getResultList();
+
+            // Đảm bảo tất cả các năm học có trong history, nếu không có dữ liệu thì đặt là 0
+            for (String year : allYears) {
+                if (!history.containsKey(year)) {
+                    history.put(year, "0");
+                }
+            }
+
+            return history;
         } catch (Exception e) {
             return new HashMap<>();
         }
