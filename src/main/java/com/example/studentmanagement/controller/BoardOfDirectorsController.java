@@ -35,7 +35,9 @@ public class BoardOfDirectorsController {
     @Autowired
     private StudentPaymentService studentPaymentService;
 
-    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade, UserService userService, AccountService accountService) {
+    @Autowired
+    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade,
+                                     UserService userService, AccountService accountService) {
         this.director = director;
         this.facade = facade;
         this.userService = userService;
@@ -113,24 +115,17 @@ public class BoardOfDirectorsController {
                  content = @Content(mediaType = "application/json",
                          schema = @Schema(implementation = Object.class)))
     @PostMapping("/create")
-public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
-    try {
-        // B1: Tạo tài khoản (Account)
-        Account account = accountService.createAccount(request);
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+        try {
+            // Sử dụng UserService để tạo tài khoản và entity
+            Object entity = userService.createUser(request);
 
-        // B2: Lấy factory tương ứng với entityType
-        UserFactory factory = userService.getFactory(request.getEntity());
-
-        // B3: Tạo entity (Student, Teacher, v.v.)
-        Object entity = factory.create(request, account);
-
-        // Trả về entity đã tạo
-        return ResponseEntity.ok(entity);
-
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+            // Trả về entity đã tạo và lưu
+            return ResponseEntity.ok(entity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        }
     }
-}
 }

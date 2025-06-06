@@ -6,6 +6,7 @@ import com.example.studentmanagement.model.Role;
 import com.example.studentmanagement.repository.AccountRepository;
 import com.example.studentmanagement.repository.RoleRepository;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 
 @Service
@@ -19,13 +20,19 @@ public class AccountService {
         this.roleRepo = roleRepo;
     }
 
-    public Account save(Account account) {
-        return accountRepo.save(account);
-    }
-
     public Account createAccount(UserRequest request) {
         if (request.getRoleId() == null) {
             throw new IllegalArgumentException("Role không được để trống");
+        }
+
+        // Kiểm tra trùng username
+        if (accountRepo.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại: " + request.getUsername());
+        }
+
+        // Kiểm tra trùng email
+        if (accountRepo.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại: " + request.getEmail());
         }
 
         Integer roleId;
@@ -52,7 +59,7 @@ public class AccountService {
         }
 
         try {
-            account.setBirthDate(java.time.LocalDate.parse(request.getBirthDate()));
+            account.setBirthDate(LocalDate.parse(request.getBirthDate()));
         } catch (Exception e) {
             throw new IllegalArgumentException("Ngày sinh không hợp lệ: " + request.getBirthDate());
         }

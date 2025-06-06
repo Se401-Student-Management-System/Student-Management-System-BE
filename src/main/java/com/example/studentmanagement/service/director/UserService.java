@@ -1,99 +1,113 @@
 package com.example.studentmanagement.service.director;
 
 import com.example.studentmanagement.dto.director.UserRequest;
-import com.example.studentmanagement.designpattern.factorymethod.*;
+import com.example.studentmanagement.designpattern.factorymethod.CashierFactory;
+import com.example.studentmanagement.designpattern.factorymethod.StudentFactory;
+import com.example.studentmanagement.designpattern.factorymethod.SupervisorFactory;
+import com.example.studentmanagement.designpattern.factorymethod.TeacherFactory;
 import com.example.studentmanagement.designpattern.factorymethod.UserFactory;
 import com.example.studentmanagement.model.Account;
-import com.example.studentmanagement.model.Role;
-import com.example.studentmanagement.repository.AccountRepository;
-import com.example.studentmanagement.repository.RoleRepository;
+import com.example.studentmanagement.model.Student;
+import com.example.studentmanagement.model.Teacher;
+import com.example.studentmanagement.model.Cashier;
+import com.example.studentmanagement.model.Supervisor;
 import com.example.studentmanagement.repository.StudentRepository;
 import com.example.studentmanagement.repository.TeacherRepository;
 import com.example.studentmanagement.repository.CashierRepository;
 import com.example.studentmanagement.repository.SupervisorRepository;
-import com.example.studentmanagement.model.Student;
-import com.example.studentmanagement.model.Supervisor;
-import com.example.studentmanagement.model.Teacher;
-import com.example.studentmanagement.model.Cashier;
-import com.example.studentmanagement.enums.WorkingStatus;
-import com.example.studentmanagement.enums.TeachingStatus;
-import com.example.studentmanagement.enums.TeacherPosition;
-import com.example.studentmanagement.enums.StudyStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class UserService {
-    private final RoleRepository roleRepo;
+
     private final AccountService accountService;
     private final StudentRepository studentRepo;
     private final TeacherRepository teacherRepo;
     private final CashierRepository cashierRepo;
     private final SupervisorRepository supervisorRepo;
+    private final Map<String, UserFactory> factoryMap;
 
-    public UserService(RoleRepository roleRepo, AccountService accountService,
-                       StudentRepository studentRepo, TeacherRepository teacherRepo,
-                       CashierRepository cashierRepo, SupervisorRepository supervisorRepo) {
-        this.roleRepo = roleRepo;
+    @Autowired
+    public UserService(AccountService accountService,
+                       StudentRepository studentRepo,
+                       TeacherRepository teacherRepo,
+                       CashierRepository cashierRepo,
+                       SupervisorRepository supervisorRepo,
+                       StudentFactory studentFactory,
+                       TeacherFactory teacherFactory,
+                       CashierFactory cashierFactory,
+                       SupervisorFactory supervisorFactory) {
         this.accountService = accountService;
         this.studentRepo = studentRepo;
         this.teacherRepo = teacherRepo;
         this.cashierRepo = cashierRepo;
         this.supervisorRepo = supervisorRepo;
+        this.factoryMap = new HashMap<>();
+        factoryMap.put("Student", studentFactory);
+        factoryMap.put("Teacher", teacherFactory);
+        factoryMap.put("Cashier", cashierFactory);
+        factoryMap.put("Supervisor", supervisorFactory);
     }
 
     public Object createUser(UserRequest request) {
-        Integer roleId = Integer.valueOf(request.getRoleId());
-        Role role = roleRepo.findById(roleId)
-                .orElseThrow(() -> new RuntimeException("Role không tồn tại"));
+        if (request.getEntity() == null) {
+            throw new IllegalArgumentException("Entity type is required");
+        }
 
+        // Tạo và lưu account
         Account account = accountService.createAccount(request);
 
-        switch (role.getRoleName()) {
+        // Tạo entity bằng factory
+        UserFactory factory = factoryMap.get(request.getEntity());
+        if (factory == null) {
+            throw new IllegalArgumentException("Unknown entity type: " + request.getEntity());
+        }
+        Object entity = factory.create(request, account);
+
+        // Gán ID thủ công và lưu entity vào bảng tương ứng
+        switch (request.getEntity()) {
             case "Student":
-                Student student = new Student();
-                student.setAccount(account);
-                student.setStatus(StudyStatus.ACTIVE);
-                student.setBirthPlace(account.getAddress());
-                student.setEthnicity("Kinh");
+                Student student = (Student) entity;
+                student.setId(generateStudentId());
                 return studentRepo.save(student);
-
             case "Teacher":
-                Teacher teacher = new Teacher();
-                teacher.setAccount(account);
-                teacher.setStatus(TeachingStatus.DANG_GIANG_DAY);
-                teacher.setPosition(TeacherPosition.TEACHER);
+                Teacher teacher = (Teacher) entity;
+                teacher.setId(generateTeacherId());
                 return teacherRepo.save(teacher);
-
             case "Cashier":
-                Cashier cashier = new Cashier();
-                cashier.setAccount(account);
-                cashier.setStatus(WorkingStatus.Working);
+                Cashier cashier = (Cashier) entity;
+                cashier.setId(generateCashierId());
                 return cashierRepo.save(cashier);
-
             case "Supervisor":
-                Supervisor supervisor = new Supervisor();
-                supervisor.setAccount(account);
-                supervisor.setStatus(WorkingStatus.Working);
+                Supervisor supervisor = (Supervisor) entity;
+                supervisor.setId(generateSupervisorId());
                 return supervisorRepo.save(supervisor);
-
             default:
-                return account; // Trường hợp không xác định rõ
+                throw new IllegalArgumentException("Unknown entity type: " + request.getEntity());
         }
     }
 
-    public UserFactory getFactory(String entityType) {
-        switch (entityType) {
-            case "Student":
-                return new StudentFactory();
-            case "Teacher":
-                return new TeacherFactory();
-            case "Cashier":
-                return new CashierFactory();
-            case "Supervisor":
-                return new SupervisorFactory();
-            default:
-                throw new IllegalArgumentException("Unknown entity type: " + entityType);
-        }
+    private String generateStudentId() {
+        long count = studentRepo.count();
+        return String.format("HS%03d", count + 1); // HS001, HS002, ...
+    }
+
+    private String generateTeacherId() {
+        long count = teacherRepo.count();
+        return String.format("GV%03d", count + 1); // GV001, GV002, ...
+    }
+
+    private String generateCashierId() {
+        long count = cashierRepo.count();
+        return String.format("CS%03d", count + 1); // CS001, CS002, ...
+    }
+
+    private String generateSupervisorId() {
+        long count = supervisorRepo.count();
+        return String.format("SP%03d", count + 1); // SP001, SP002, ...
     }
 }

@@ -17,19 +17,5 @@ public class UserRequest {
     private String gender;
     private String birthDate;
     private String roleId;
-
-    public String getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(String roleId) {
-        this.roleId = roleId;
-    }
-
-    private String entity;
-    // other fields, constructors, etc.
-
-    public String getEntity() {
-        return entity;
-    }
+    private String entity; // "Student", "Teacher", "Cashier", "Supervisor"
 }
