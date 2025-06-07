@@ -4,6 +4,7 @@ import com.example.studentmanagement.converter.TeacherPositionConverter;
 import com.example.studentmanagement.converter.TeachingStatusConverter;
 import com.example.studentmanagement.enums.TeacherPosition;
 import com.example.studentmanagement.enums.TeachingStatus;
+import com.example.studentmanagement.designpattern.proxy.GradeInterface;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +14,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Teacher {
+public class Teacher implements GradeInterface{
 
     @Id
     @Column(length = 10)
@@ -34,6 +35,11 @@ public class Teacher {
     public Teacher(String id) {
         this.id = id;
         this.status = TeachingStatus.DANG_GIANG_DAY;
+    }
+
+    @Override
+    public String getRole(){
+        return "TEACHER";
     }
 
 }

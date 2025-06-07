@@ -16,4 +16,8 @@ public class Subject {
 
     @Column(name = "subject_name", length = 255, nullable = false, unique = true)
     private String subjectName;
+
+    public String getName() {
+        return subjectName;
+    }
 }

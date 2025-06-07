@@ -1,6 +1,7 @@
 package com.example.studentmanagement.model;
 
 import com.example.studentmanagement.enums.StudyStatus;
+import com.example.studentmanagement.designpattern.proxy.GradeInterface;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student {
+public class Student implements GradeInterface{
     @Id
     @Column(length = 10)
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -35,5 +36,10 @@ public class Student {
     public Student(String id) {
         this.id = id;
         this.status = StudyStatus.ACTIVE;
+    }
+
+    @Override
+    public String getRole() {
+        return "STUDENT";
     }
 }
