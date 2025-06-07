@@ -22,4 +22,9 @@ public class Supervisor {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WorkingStatus status;
+
+    public Supervisor(String id) {
+        this.id = id;
+        this.status = WorkingStatus.Working;
+    }
 }

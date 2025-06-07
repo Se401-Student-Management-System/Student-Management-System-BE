@@ -4,6 +4,7 @@ import com.example.studentmanagement.converter.TeacherPositionConverter;
 import com.example.studentmanagement.converter.TeachingStatusConverter;
 import com.example.studentmanagement.enums.TeacherPosition;
 import com.example.studentmanagement.enums.TeachingStatus;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,5 +30,10 @@ public class Teacher {
     @Convert(converter = TeachingStatusConverter.class) // <- BẮT BUỘC
     @Column(nullable = false)
     private TeachingStatus status;
+
+    public Teacher(String id) {
+        this.id = id;
+        this.status = TeachingStatus.DANG_GIANG_DAY;
+    }
 
 }
