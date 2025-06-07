@@ -113,24 +113,25 @@ public class BoardOfDirectorsController {
                  content = @Content(mediaType = "application/json",
                          schema = @Schema(implementation = Object.class)))
     @PostMapping("/create")
-public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
-    try {
-        // B1: Tạo tài khoản (Account)
-        Account account = accountService.createAccount(request);
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+        try {
+            // B1: Tạo tài khoản (Account)
+            Account account = accountService.createAccount(request);
 
-        // B2: Lấy factory tương ứng với entityType
-        UserFactory factory = userService.getFactory(request.getEntity());
+            // B2: Lấy factory tương ứng với entityType
+            UserFactory factory = userService.getFactory(request.getEntity());
 
-        // B3: Tạo entity (Student, Teacher, v.v.)
-        Object entity = factory.create(request, account);
+            // B3: Tạo entity (Student, Teacher, v.v.)
+            Object entity = factory.create(request, account);
+            System.out.println("Created entity: " + entity); // Debug log
 
-        // Trả về entity đã tạo
-        return ResponseEntity.ok(entity);
+            // Trả về entity đã tạo
+            return ResponseEntity.ok(entity);
 
-    } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        }
     }
-}
 }
