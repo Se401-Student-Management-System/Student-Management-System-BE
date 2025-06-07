@@ -35,7 +35,9 @@ public class BoardOfDirectorsController {
     @Autowired
     private StudentPaymentService studentPaymentService;
 
-    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade, UserService userService, AccountService accountService) {
+    @Autowired
+    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade,
+                                     UserService userService, AccountService accountService) {
         this.director = director;
         this.facade = facade;
         this.userService = userService;
@@ -115,19 +117,11 @@ public class BoardOfDirectorsController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
         try {
-            // B1: Tạo tài khoản (Account)
-            Account account = accountService.createAccount(request);
+            // Sử dụng UserService để tạo tài khoản và entity
+            Object entity = userService.createUser(request);
 
-            // B2: Lấy factory tương ứng với entityType
-            UserFactory factory = userService.getFactory(request.getEntity());
-
-            // B3: Tạo entity (Student, Teacher, v.v.)
-            Object entity = factory.create(request, account);
-            System.out.println("Created entity: " + entity); // Debug log
-
-            // Trả về entity đã tạo
+            // Trả về entity đã tạo và lưu
             return ResponseEntity.ok(entity);
-
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
