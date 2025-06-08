@@ -1,21 +1,20 @@
 package com.example.studentmanagement.designpattern.factorymethod;
 
-import com.example.studentmanagement.dto.director.UserRequest;
+import com.example.studentmanagement.dto.director.StudentRequest;
 import com.example.studentmanagement.model.Account;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.enums.StudyStatus;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StudentFactory implements UserFactory {
-
+public class StudentFactory implements UserFactory<Student, StudentRequest> {
     @Override
-    public Object create(UserRequest request, Account account) {
+    public Student create(StudentRequest request, Account account) {
         Student student = new Student();
         student.setAccount(account);
-        student.setStatus(StudyStatus.ACTIVE);
-        student.setBirthPlace(account.getAddress() != null ? account.getAddress() : "Unknown");
-        student.setEthnicity("Kinh");
+        student.setBirthPlace(request.getBirthPlace());
+        student.setEthnicity(request.getEthnicity());
+        student.setStatus(StudyStatus.valueOf(request.getStatus()));
         return student;
     }
 }

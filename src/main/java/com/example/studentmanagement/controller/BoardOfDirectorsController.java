@@ -4,9 +4,18 @@ import com.example.studentmanagement.designpattern.builder.SchoolRecordDirector;
 import com.example.studentmanagement.designpattern.facade.StudentManagementFacade;
 import com.example.studentmanagement.dto.director.SchoolRecord;
 import com.example.studentmanagement.dto.director.StudentPaymentDTO;
+import com.example.studentmanagement.dto.director.StudentRequest;
+import com.example.studentmanagement.dto.director.TeacherRequest;
+import com.example.studentmanagement.dto.director.CashierRequest;
+import com.example.studentmanagement.dto.director.SupervisorRequest;
+import com.example.studentmanagement.model.Cashier;
+import com.example.studentmanagement.model.Supervisor;
+import com.example.studentmanagement.model.Teacher;
+
 import com.example.studentmanagement.service.director.StudentPaymentService;
 import com.example.studentmanagement.designpattern.factorymethod.UserFactory;
 import com.example.studentmanagement.model.Account;
+import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.dto.director.UserRequest;
 import com.example.studentmanagement.service.director.UserService;
 import com.example.studentmanagement.service.director.AccountService;
@@ -17,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,18 +124,36 @@ public class BoardOfDirectorsController {
     @ApiResponse(responseCode = "200", description = "Successfully created",
                  content = @Content(mediaType = "application/json",
                          schema = @Schema(implementation = Object.class)))
-    @PostMapping("/create")
-    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
-        try {
-            // Sử dụng UserService để tạo tài khoản và entity
-            Object entity = userService.createUser(request);
 
-            // Trả về entity đã tạo và lưu
-            return ResponseEntity.ok(entity);
+    @PostMapping("/student/add")
+    public ResponseEntity<Student> createStudent(@RequestBody StudentRequest request) {
+        try {
+            Student student = userService.createStudent(request);
+            return ResponseEntity.ok(student);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         }
+    }
+
+    @PostMapping("/teacher/create")
+    public ResponseEntity<Teacher> createTeacher(@RequestBody TeacherRequest request) {
+        try {
+            Teacher teacher = userService.createTeacher(request);
+            return ResponseEntity.ok(teacher);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @PostMapping("/cashier/create")
+    public ResponseEntity<Cashier> createCashier(@RequestBody CashierRequest request) {
+        Cashier cashier = userService.createCashier(request);
+        return ResponseEntity.ok(cashier);
+    }
+
+    @PostMapping("/supervisor/create")
+    public ResponseEntity<Supervisor> createSupervisor(@RequestBody SupervisorRequest request) {
+        Supervisor supervisor = userService.createSupervisor(request);
+        return ResponseEntity.ok(supervisor);
     }
 }
