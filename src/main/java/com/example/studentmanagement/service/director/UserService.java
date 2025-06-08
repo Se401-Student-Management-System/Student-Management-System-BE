@@ -1,16 +1,17 @@
 package com.example.studentmanagement.service.director;
 
 import com.example.studentmanagement.dto.director.UserRequest;
-import com.example.studentmanagement.designpattern.factorymethod.CashierFactory;
-import com.example.studentmanagement.designpattern.factorymethod.StudentFactory;
-import com.example.studentmanagement.designpattern.factorymethod.SupervisorFactory;
-import com.example.studentmanagement.designpattern.factorymethod.TeacherFactory;
 import com.example.studentmanagement.designpattern.factorymethod.UserFactory;
+import com.example.studentmanagement.designpattern.factorymethod.StudentFactory;
+import com.example.studentmanagement.designpattern.factorymethod.TeacherFactory;
+import com.example.studentmanagement.designpattern.factorymethod.CashierFactory;
+import com.example.studentmanagement.designpattern.factorymethod.SupervisorFactory;
 import com.example.studentmanagement.model.Account;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.model.Teacher;
 import com.example.studentmanagement.model.Cashier;
 import com.example.studentmanagement.model.Supervisor;
+import com.example.studentmanagement.model.UserEntity;
 import com.example.studentmanagement.repository.StudentRepository;
 import com.example.studentmanagement.repository.TeacherRepository;
 import com.example.studentmanagement.repository.CashierRepository;
@@ -53,22 +54,18 @@ public class UserService {
         factoryMap.put("Supervisor", supervisorFactory);
     }
 
-    public Object createUser(UserRequest request) {
+    public UserEntity createUser(UserRequest request) {
         if (request.getEntity() == null) {
             throw new IllegalArgumentException("Entity type is required");
         }
 
-        // Tạo và lưu account
         Account account = accountService.createAccount(request);
-
-        // Tạo entity bằng factory
         UserFactory factory = factoryMap.get(request.getEntity());
         if (factory == null) {
             throw new IllegalArgumentException("Unknown entity type: " + request.getEntity());
         }
         Object entity = factory.create(request, account);
 
-        // Gán ID thủ công và lưu entity vào bảng tương ứng
         switch (request.getEntity()) {
             case "Student":
                 Student student = (Student) entity;
@@ -93,21 +90,21 @@ public class UserService {
 
     private String generateStudentId() {
         long count = studentRepo.count();
-        return String.format("HS%03d", count + 1); // HS001, HS002, ...
+        return String.format("HS%03d", count + 1);
     }
 
     private String generateTeacherId() {
         long count = teacherRepo.count();
-        return String.format("GV%03d", count + 1); // GV001, GV002, ...
+        return String.format("GV%03d", count + 1);
     }
 
     private String generateCashierId() {
         long count = cashierRepo.count();
-        return String.format("CS%03d", count + 1); // CS001, CS002, ...
+        return String.format("CS%03d", count + 1);
     }
 
     private String generateSupervisorId() {
         long count = supervisorRepo.count();
-        return String.format("SP%03d", count + 1); // SP001, SP002, ...
+        return String.format("SP%03d", count + 1);
     }
 }
