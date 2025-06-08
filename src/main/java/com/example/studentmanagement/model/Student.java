@@ -14,7 +14,6 @@ import lombok.*;
 public class Student implements UserEntity {
     @Id
     @Column(length = 10)
-    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(optional = false, cascade = CascadeType.ALL)
