@@ -11,7 +11,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student {
+public class Student implements UserEntity {
     @Id
     @Column(length = 10)
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -36,4 +36,15 @@ public class Student {
         this.id = id;
         this.status = StudyStatus.ACTIVE;
     }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public Account getAccount() { return account; }
+    public void setAccount(Account account) { this.account = account; }
+    public StudyStatus getStatus() { return status; }
+    public void setStatus(StudyStatus status) { this.status = status; }
+    public String getBirthPlace() { return birthPlace; }
+    public void setBirthPlace(String birthPlace) { this.birthPlace = birthPlace; }
+    public String getEthnicity() { return ethnicity; }
+    public void setEthnicity(String ethnicity) { this.ethnicity = ethnicity; }
 }

@@ -13,7 +13,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Teacher {
+public class Teacher implements UserEntity {
 
     @Id
     @Column(length = 10)
@@ -36,4 +36,13 @@ public class Teacher {
         this.status = TeachingStatus.DANG_GIANG_DAY;
     }
 
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public Account getAccount() { return account; }
+    public void setAccount(Account account) { this.account = account; }
+    public TeachingStatus getStatus() { return status; }
+    public void setStatus(TeachingStatus status) { this.status = status; }
+
+    public TeacherPosition getPosition() { return position; }
+    public void setPosition(TeacherPosition position) { this.position = position; }
 }

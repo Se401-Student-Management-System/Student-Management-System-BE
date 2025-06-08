@@ -4,17 +4,11 @@ import com.example.studentmanagement.designpattern.builder.SchoolRecordDirector;
 import com.example.studentmanagement.designpattern.facade.StudentManagementFacade;
 import com.example.studentmanagement.dto.director.SchoolRecord;
 import com.example.studentmanagement.dto.director.StudentPaymentDTO;
-import com.example.studentmanagement.dto.director.StudentRequest;
-import com.example.studentmanagement.dto.director.TeacherRequest;
-import com.example.studentmanagement.dto.director.CashierRequest;
-import com.example.studentmanagement.dto.director.SupervisorRequest;
 import com.example.studentmanagement.model.Cashier;
 import com.example.studentmanagement.model.Supervisor;
 import com.example.studentmanagement.model.Teacher;
-
+import com.example.studentmanagement.model.UserEntity;
 import com.example.studentmanagement.service.director.StudentPaymentService;
-import com.example.studentmanagement.designpattern.factorymethod.UserFactory;
-import com.example.studentmanagement.model.Account;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.dto.director.UserRequest;
 import com.example.studentmanagement.service.director.UserService;
@@ -26,7 +20,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -124,36 +117,36 @@ public class BoardOfDirectorsController {
     @ApiResponse(responseCode = "200", description = "Successfully created",
                  content = @Content(mediaType = "application/json",
                          schema = @Schema(implementation = Object.class)))
-
-    @PostMapping("/student/add")
-    public ResponseEntity<Student> createStudent(@RequestBody StudentRequest request) {
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
         try {
-            Student student = userService.createStudent(request);
-            return ResponseEntity.ok(student);
+            UserEntity entity = userService.createUser(request);
+            // Chuyển đổi sang JSON phù hợp với từng entity (có thể dùng DTO)
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", entity instanceof Student ? ((Student) entity).getId() : 
+                               entity instanceof Teacher ? ((Teacher) entity).getId() : 
+                               entity instanceof Cashier ? ((Cashier) entity).getId() : 
+                               entity instanceof Supervisor ? ((Supervisor) entity).getId() : null);
+            response.put("account", entity.getAccount());
+            if (entity instanceof Student) {
+                Student student = (Student) entity;
+                response.put("birthPlace", student.getBirthPlace());
+                response.put("ethnicity", student.getEthnicity());
+            } else if (entity instanceof Teacher) {
+                Teacher teacher = (Teacher) entity;
+                response.put("position", teacher.getPosition());
+            } else if (entity instanceof Cashier) {
+                Cashier cashier = (Cashier) entity;
+                response.put("status", cashier.getStatus());
+            } else if (entity instanceof Supervisor) {
+                Supervisor supervisor = (Supervisor) entity;
+                response.put("status", supervisor.getStatus());
+            }
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
         }
-    }
-
-    @PostMapping("/teacher/create")
-    public ResponseEntity<Teacher> createTeacher(@RequestBody TeacherRequest request) {
-        try {
-            Teacher teacher = userService.createTeacher(request);
-            return ResponseEntity.ok(teacher);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        }
-    }
-
-    @PostMapping("/cashier/create")
-    public ResponseEntity<Cashier> createCashier(@RequestBody CashierRequest request) {
-        Cashier cashier = userService.createCashier(request);
-        return ResponseEntity.ok(cashier);
-    }
-
-    @PostMapping("/supervisor/create")
-    public ResponseEntity<Supervisor> createSupervisor(@RequestBody SupervisorRequest request) {
-        Supervisor supervisor = userService.createSupervisor(request);
-        return ResponseEntity.ok(supervisor);
     }
 }
