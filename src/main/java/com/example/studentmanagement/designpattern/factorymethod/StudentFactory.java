@@ -13,7 +13,7 @@ public class StudentFactory implements UserFactory {
     public Object create(UserRequest request, Account account) {
         Student student = new Student();
         student.setAccount(account);
-        student.setStatus(StudyStatus.ACTIVE);
+        student.setStatus(StudyStatus.PENDING);
         student.setBirthPlace(account.getAddress() != null ? account.getAddress() : "Unknown");
         student.setEthnicity("Kinh");
         return student;

@@ -33,7 +33,7 @@ public class Student implements UserEntity {
 
     public Student(String id) {
         this.id = id;
-        this.status = StudyStatus.ACTIVE;
+        this.status = StudyStatus.PENDING;
     }
 
     public String getId() { return id; }
