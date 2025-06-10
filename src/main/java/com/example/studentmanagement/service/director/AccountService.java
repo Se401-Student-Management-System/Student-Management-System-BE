@@ -51,6 +51,7 @@ public class AccountService {
         account.setFullName(request.getFullName());
         account.setPhoneNumber(request.getPhoneNumber());
         account.setAddress(request.getAddress());
+        
 
         try {
             account.setGender(Account.Gender.valueOf(request.getGender()));
@@ -68,4 +69,8 @@ public class AccountService {
 
         return accountRepo.save(account);
     }
+
+public Account saveAccount(Account account) {
+    return accountRepo.save(account);
+}
 }
