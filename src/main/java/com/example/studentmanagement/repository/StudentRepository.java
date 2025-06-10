@@ -19,11 +19,11 @@ public interface StudentRepository extends JpaRepository<Student, String> {
             "JOIN StudentClass sc ON sc.student.id = s.id " +
             "JOIN sc.clazz c " +
             "WHERE c.className LIKE :gradePrefix || '%' AND sc.academicYear = :academicYear")
-    List<Student> findStudentsByGradeAndYear(@Param("gradePrefix") String gradePrefix, @Param("academicYear") String academicYear);
-    
+    List<Student> findStudentsByGradeAndYear(@Param("gradePrefix") String gradePrefix,
+            @Param("academicYear") String academicYear);
+
     // Tìm học sinh theo ID
     Optional<Student> findById(String id);
 
-    // Corrected method to use StudyStatus enum
     List<Student> findByStatus(StudyStatus status);
 }
