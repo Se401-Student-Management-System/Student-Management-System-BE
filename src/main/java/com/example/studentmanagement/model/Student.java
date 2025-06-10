@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
@@ -52,6 +54,9 @@ public class Student implements GradeInterface, UserEntity {
     @Transient
     private InactiveState inactiveState;
 
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Score> scores = new ArrayList<>();
+
     public Student(String id, Account account, String ethnicity, String birthPlace, StudyStatus status) {
         this.id = id;
         this.account = account;
@@ -75,6 +80,22 @@ public class Student implements GradeInterface, UserEntity {
         return "STUDENT";
     }
 
+    @Override
+    public boolean isAuthorized(UserEntity user) {
+        if (user instanceof Student) {
+            return this.getId().equals(((Student) user).getId());
+        }
+        return false;
+    }
+
+    public List<Score> getScores() {
+        return scores;
+    }
+
+    public void setScores(List<Score> scores) {
+        this.scores = scores;
+    }
+   
     private void initStates() {
         this.activeState = new ActiveState(this);
         this.pendingState = new PendingState(this);

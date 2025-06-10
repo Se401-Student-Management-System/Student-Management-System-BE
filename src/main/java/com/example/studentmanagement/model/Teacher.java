@@ -8,6 +8,8 @@ import com.example.studentmanagement.designpattern.proxy.GradeInterface;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Entity
 @Table(name = "teacher")
@@ -52,4 +54,25 @@ public class Teacher implements GradeInterface, UserEntity {
 
     public TeacherPosition getPosition() { return position; }
     public void setPosition(TeacherPosition position) { this.position = position; }
+
+    @Override
+    public boolean isAuthorized(UserEntity user) {
+        if (user instanceof Teacher) {
+            return this.getId().equals(((Teacher) user).getId());
+        }
+        if (user instanceof Student) {
+            // Có thể mở rộng: kiểm tra giáo viên có dạy học sinh này không
+            return false;
+        }
+        return false;
+    }
+
+    public void checkIfTeaching(Student student) {
+        boolean isTeaching = student.getScores().stream()
+            .anyMatch(score -> score.getTeacher().getId().equals(this.getId()));
+
+        if (!isTeaching) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không dạy học sinh này, không thể xem điểm.");
+        }
+    }
 }
