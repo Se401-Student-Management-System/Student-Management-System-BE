@@ -9,7 +9,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Supervisor {
+public class Supervisor implements UserEntity {
 
     @Id
     @Column(length = 10)
@@ -22,4 +22,16 @@ public class Supervisor {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private WorkingStatus status;
+
+    public Supervisor(String id) {
+        this.id = id;
+        this.status = WorkingStatus.Working;
+    }
+
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+    public Account getAccount() { return account; }
+    public void setAccount(Account account) { this.account = account; }
+    public WorkingStatus getWorkingStatus() { return status; }
+    public void setWorkingStatus(WorkingStatus status) { this.status = status; }
 }

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 //disable security
 @SpringBootApplication(exclude = {
@@ -13,12 +14,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 		org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration.class,
 		// DataSourceAutoConfiguration.class // tắt tự động cấu hình datasource
 })
-
-// @SpringBootApplication
+@EnableAsync
 public class StudentManagementApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(StudentManagementApplication.class, args);
 	}
-
 }

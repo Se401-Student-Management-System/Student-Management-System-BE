@@ -4,7 +4,20 @@ import com.example.studentmanagement.designpattern.builder.SchoolRecordDirector;
 import com.example.studentmanagement.designpattern.facade.StudentManagementFacade;
 import com.example.studentmanagement.dto.director.SchoolRecord;
 import com.example.studentmanagement.dto.director.StudentPaymentDTO;
+import com.example.studentmanagement.model.Cashier;
+import com.example.studentmanagement.model.Supervisor;
+import com.example.studentmanagement.model.Teacher;
+import com.example.studentmanagement.model.UserEntity;
 import com.example.studentmanagement.service.director.StudentPaymentService;
+import com.example.studentmanagement.model.Student;
+import com.example.studentmanagement.dto.director.UserRequest;
+import com.example.studentmanagement.service.director.UserService;
+import com.example.studentmanagement.service.director.AccountService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +33,18 @@ public class BoardOfDirectorsController {
 
     private final SchoolRecordDirector director;
     private final StudentManagementFacade facade;
+    private final UserService userService;
+    private final AccountService accountService;
     @Autowired
     private StudentPaymentService studentPaymentService;
 
-    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade) {
+    @Autowired
+    public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade,
+                                     UserService userService, AccountService accountService) {
         this.director = director;
         this.facade = facade;
+        this.userService = userService;
+        this.accountService = accountService;
     }
 
     @GetMapping("/school-record")
@@ -92,5 +111,42 @@ public class BoardOfDirectorsController {
         response.put("selectedClass", selectedClass);
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Create a new user", description = "Create a new user based on role and entity type")
+    @ApiResponse(responseCode = "200", description = "Successfully created",
+                 content = @Content(mediaType = "application/json",
+                         schema = @Schema(implementation = Object.class)))
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+        try {
+            UserEntity entity = userService.createUser(request);
+            // Chuyển đổi sang JSON phù hợp với từng entity (có thể dùng DTO)
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", entity instanceof Student ? ((Student) entity).getId() : 
+                               entity instanceof Teacher ? ((Teacher) entity).getId() : 
+                               entity instanceof Cashier ? ((Cashier) entity).getId() : 
+                               entity instanceof Supervisor ? ((Supervisor) entity).getId() : null);
+            response.put("account", entity.getAccount());
+            if (entity instanceof Student) {
+                Student student = (Student) entity;
+                response.put("birthPlace", student.getBirthPlace());
+                response.put("ethnicity", student.getEthnicity());
+            } else if (entity instanceof Teacher) {
+                Teacher teacher = (Teacher) entity;
+                response.put("position", teacher.getPosition());
+            } else if (entity instanceof Cashier) {
+                Cashier cashier = (Cashier) entity;
+                response.put("status", cashier.getStatus());
+            } else if (entity instanceof Supervisor) {
+                Supervisor supervisor = (Supervisor) entity;
+                response.put("status", supervisor.getStatus());
+            }
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        }
     }
 }

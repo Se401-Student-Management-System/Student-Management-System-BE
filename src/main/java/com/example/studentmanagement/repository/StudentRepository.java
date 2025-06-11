@@ -1,5 +1,6 @@
 package com.example.studentmanagement.repository;
 
+import com.example.studentmanagement.enums.StudyStatus;
 import com.example.studentmanagement.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,10 +19,11 @@ public interface StudentRepository extends JpaRepository<Student, String> {
             "JOIN StudentClass sc ON sc.student.id = s.id " +
             "JOIN sc.clazz c " +
             "WHERE c.className LIKE :gradePrefix || '%' AND sc.academicYear = :academicYear")
-    List<Student> findStudentsByGradeAndYear(@Param("gradePrefix") String gradePrefix, @Param("academicYear") String academicYear);
-    
+    List<Student> findStudentsByGradeAndYear(@Param("gradePrefix") String gradePrefix,
+            @Param("academicYear") String academicYear);
+
     // Tìm học sinh theo ID
     Optional<Student> findById(String id);
 
-    List<Student> findByStatus(String status);
+    List<Student> findByStatus(StudyStatus status);
 }
