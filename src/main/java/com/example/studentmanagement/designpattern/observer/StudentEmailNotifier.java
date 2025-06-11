@@ -27,7 +27,7 @@ public class StudentEmailNotifier implements Subscriber {
                     "Điểm số của bạn đã được cập nhật như sau:\n" +
                     message + "\n\n" +
                     "Vui lòng kiểm tra chi tiết trên hệ thống Quản lý Học sinh.\n" +
-                    "Nếu có thắc mắc, xin vui lòng liên hệ support@studentmanagement.com hoặc số 0123-456-789.\n\n" +
+                    "Nếu có thắc mắc, xin vui lòng liên hệ edusms26@gmail.com.\n\n" +
                     "Trân trọng,\n" +
                     "Hệ thống Quản lý Học sinh"
                 );

@@ -44,8 +44,7 @@ public class ScorePublisher {
         if (scores.isEmpty()) return;
         String message = "Đã cập nhật điểm cho " + scores.size() + " học sinh trong học kỳ " +
                 scores.get(0).getSemester() + ", năm học " + scores.get(0).getAcademicYear() + ".\n" +
-                "Ngày cập nhật: " + LocalDate.now() + "\n" +
-                "Liên hệ hỗ trợ: support@studentmanagement.com hoặc 0123-456-789.";
+                "Ngày cập nhật: " + LocalDate.now() + "\n";
         for (Subscriber subscriber : subscribers) {
             subscriber.update("SCORE_BATCH_UPDATED", teacherAccount, message);
         }
@@ -85,7 +84,6 @@ public class ScorePublisher {
         }
         message.append("Giáo viên: ").append(score.getTeacher().getAccount().getFullName()).append("\n");
         message.append("Ngày cập nhật: ").append(LocalDate.now()).append("\n");
-        message.append("Liên hệ hỗ trợ: support@studentmanagement.com hoặc 0123-456-789.");
 
         return message.toString().trim(); // Loại bỏ dòng trống cuối cùng
     }
