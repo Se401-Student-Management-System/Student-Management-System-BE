@@ -18,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 @AllArgsConstructor
 
 public class Teacher implements GradeInterface, UserEntity {
-
     @Id
     @Column(length = 10)
     private String id;
@@ -61,7 +60,6 @@ public class Teacher implements GradeInterface, UserEntity {
             return this.getId().equals(((Teacher) user).getId());
         }
         if (user instanceof Student) {
-            // Có thể mở rộng: kiểm tra giáo viên có dạy học sinh này không
             return false;
         }
         return false;

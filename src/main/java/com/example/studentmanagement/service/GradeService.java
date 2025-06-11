@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class GradeService {
-
     private final StudentRepository studentRepository;
     private final TeacherRepository teacherRepository;
     private final GradeBookProxy gradeBookProxy;
@@ -29,7 +28,6 @@ public class GradeService {
         Student targetStudent = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh"));
 
-        // Chuyển role thành entity đúng để truyền vào proxy
         if ("STUDENT".equalsIgnoreCase(role)) {
             user = studentRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh đang đăng nhập"));
@@ -40,7 +38,6 @@ public class GradeService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vai trò không được phép truy cập điểm số.");
         }
 
-        // Gọi proxy để kiểm tra quyền truy cập và trả về danh sách điểm
         List<Score> scores = gradeBookProxy.getGrades(user, targetStudent, semester, academicYear);
 
         return scores.stream().map(score -> new GradeResponse(

@@ -15,7 +15,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class GradeBookProxy {
-
     private final ScoreRepository scoreRepository;
 
     public List<Score> getGrades(GradeInterface user, Student student, int semester, String academicYear) {

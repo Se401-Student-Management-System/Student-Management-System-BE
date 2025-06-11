@@ -22,7 +22,6 @@ import java.util.List;
 @AllArgsConstructor
 
 public class Student implements GradeInterface, UserEntity {
-
     @Id
     @Column(length = 10)
     private String id;
@@ -64,15 +63,14 @@ public class Student implements GradeInterface, UserEntity {
         this.birthPlace = birthPlace;
         this.status = status;
 
-        // Khởi tạo các thể hiện của các trạng thái cụ thể
         initStates();
     }
 
     public Student(String id) {
         this.id = id;
         this.status = StudyStatus.PENDING;
-        initStates(); // Khởi tạo các state objects
-        setInitialState(); // Thiết lập currentState
+        initStates();
+        setInitialState();
     }
 
     @Override
@@ -135,7 +133,6 @@ public class Student implements GradeInterface, UserEntity {
         return currentState;
     }
 
-    // Đây là nơi Student ủy quyền hành động cho đối tượng trạng thái hiện tại
     public void performStudy() {
         if (this.currentState == null)
             setInitialState();

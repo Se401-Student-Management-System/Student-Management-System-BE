@@ -18,7 +18,7 @@ public class GradeController {
     @GetMapping("/{studentId}")
     public ResponseEntity<List<GradeResponse>> getGrades(
             @PathVariable String studentId,
-            @RequestParam String userId,              // user đang đăng nhập (teacher hoặc student)
+            @RequestParam String userId,              // user đang đăng nhập (teacher/student)
             @RequestParam String role,        
             @RequestParam int semester,
             @RequestParam String academicYear 
