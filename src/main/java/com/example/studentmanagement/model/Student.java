@@ -54,6 +54,7 @@ public class Student implements GradeInterface, UserEntity {
     private InactiveState inactiveState;
 
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("student")
     private List<Score> scores = new ArrayList<>();
 
     public Student(String id, Account account, String ethnicity, String birthPlace, StudyStatus status) {
@@ -223,5 +224,9 @@ public class Student implements GradeInterface, UserEntity {
 
     public void setEthnicity(String ethnicity) {
         this.ethnicity = ethnicity;
+    }
+
+    public String getFullName() {
+        return account != null ? account.getFullName() : null;
     }
 }

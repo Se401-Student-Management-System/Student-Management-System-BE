@@ -5,6 +5,7 @@ import com.example.studentmanagement.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +23,7 @@ public interface ScoreRepository extends JpaRepository<Score, Integer> {
     Optional<Score> findByStudentIdAndSubjectIdAndSemesterAndAcademicYear(
         String studentId, Integer subjectId, Integer semester, String academicYear
     );
+
+    @Query("SELECT DISTINCT s.student FROM Score s WHERE s.teacher.id = :teacherId")
+    List<Student> findStudentsByTeacherId(@Param("teacherId") String teacherId);
 }

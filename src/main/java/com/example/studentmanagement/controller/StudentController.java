@@ -1,17 +1,13 @@
 package com.example.studentmanagement.controller;
 
-import com.example.studentmanagement.converter.StudentConverter;
-import com.example.studentmanagement.designpattern.iterator.IStudentIterator;
 import com.example.studentmanagement.dto.student.StudentDTO;
 import com.example.studentmanagement.model.Student;
-import com.example.studentmanagement.service.student.StudentManager;
 import com.example.studentmanagement.service.student.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -112,12 +108,6 @@ public class StudentController {
     }
 
 //    ITERATOR
-    @Autowired
-    private StudentManager studentManager;
-
-    @Autowired
-    private StudentConverter studentConverter;
-
     @GetMapping("/list-all")
     public ResponseEntity<List<StudentDTO>> getAllStudentsUsingIterator() {
         try {
@@ -138,5 +128,14 @@ public class StudentController {
             return ResponseEntity.noContent().build(); // HTTP 204 No Content nếu không có sinh viên
         }
         return ResponseEntity.ok(studentDTOList); // Trả về danh sách StudentDTO
+    }
+
+    @Autowired
+    private com.example.studentmanagement.repository.ScoreRepository scoreRepository;
+
+    @GetMapping("/by-teacher/{teacherId}")
+    public ResponseEntity<List<Student>> getStudentsByTeacher(@PathVariable String teacherId) {
+        List<Student> students = scoreRepository.findStudentsByTeacherId(teacherId);
+        return ResponseEntity.ok(students);
     }
 }
