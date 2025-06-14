@@ -27,7 +27,7 @@ public class TeacherEmailNotifier implements Subscriber {
                     "Bạn đã thực hiện cập nhật điểm số thành công:\n" +
                     message + "\n\n" +
                     "Vui lòng kiểm tra lại trên hệ thống Quản lý Học sinh nếu cần thiết.\n" +
-                    "Nếu có thắc mắc, xin vui lòng liên hệ support@studentmanagement.com hoặc số 0123-456-789.\n\n" +
+                    "Nếu có thắc mắc, xin vui lòng liên hệ edusms26@gmail.com.\n\n" +
                     "Trân trọng,\n" +
                     "Hệ thống Quản lý Học sinh"
                 );

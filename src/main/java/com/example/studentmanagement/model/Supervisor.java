@@ -28,10 +28,27 @@ public class Supervisor implements UserEntity {
         this.status = WorkingStatus.Working;
     }
 
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public Account getAccount() { return account; }
-    public void setAccount(Account account) { this.account = account; }
-    public WorkingStatus getWorkingStatus() { return status; }
-    public void setWorkingStatus(WorkingStatus status) { this.status = status; }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public WorkingStatus getWorkingStatus() {
+        return status;
+    }
+
+    public void setWorkingStatus(WorkingStatus status) {
+        this.status = status;
+    }
 }
