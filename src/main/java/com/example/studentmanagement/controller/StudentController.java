@@ -3,7 +3,6 @@ package com.example.studentmanagement.controller;
 import com.example.studentmanagement.dto.student.StudentDTO;
 import com.example.studentmanagement.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -129,21 +128,22 @@ public class StudentController {
         return ResponseEntity.ok(studentDTOList); // Trả về danh sách StudentDTO
     }
 
-    @Autowired
-    private com.example.studentmanagement.repository.ScoreRepository scoreRepository;
+    // @Autowired
+    // private com.example.studentmanagement.repository.ScoreRepository scoreRepository;
 
-    @GetMapping("/by-teacher/{teacherId}")
-    public ResponseEntity<List<StudentDTO>> getStudentsByTeacher(@PathVariable String teacherId) {
-        List<StudentDTO> students = scoreRepository.findStudentDTOsByTeacherId(teacherId);
-        return ResponseEntity.ok(students);
-    }
-
-    // @GetMapping("/by-class-and-subject")
-    // public ResponseEntity<?> getStudentsByClassAndSubject(
-    //         @RequestParam String classId,
-    //         @RequestParam String subjectId
-    // ) {
-    //     List<StudentDTO> students = studentService.findStudentsByClassAndSubject(classId, subjectId);
+    // @GetMapping("/by-teacher/{teacherId}")
+    // public ResponseEntity<List<StudentDTO>> getStudentsByTeacher(@PathVariable String teacherId) {
+    //     List<StudentDTO> students = scoreRepository.findStudentDTOsByTeacherId(teacherId);
     //     return ResponseEntity.ok(students);
     // }
+
+    @GetMapping("/by-subject")
+    public ResponseEntity<List<StudentDTO>> getStudentsBySubject(
+            @RequestParam String subjectId,
+            @RequestParam String academicYear,
+            @RequestParam int semester
+    ) {
+        List<StudentDTO> students = studentService.findStudentsBySubject(subjectId, academicYear, semester);
+        return ResponseEntity.ok(students);
+    }
 }

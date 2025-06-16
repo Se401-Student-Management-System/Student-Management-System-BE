@@ -135,29 +135,28 @@ public class StudentService {
         }
         return dto;
     }
-
-    // @Transactional(readOnly = true)
-    // public List<StudentDTO> findStudentsByClassAndSubject(String classId, String subjectId) {
-    //     // Lấy tất cả StudentClass thuộc classId
-    //     List<StudentClass> studentClasses = studentClassRepository.findByClazz_Id(classId);
-
-    //     List<StudentDTO> result = new ArrayList<>();
-    //     for (StudentClass sc : studentClasses) {
-    //         Student student = sc.getStudent();
-    //         // Kiểm tra học sinh này có học môn subjectId không
-    //         boolean hasSubject = student.getScores().stream()
-    //             .anyMatch(score -> 
-    //                 score.getSubject() != null &&
-    //                 String.valueOf(score.getSubject().getId()).equals(subjectId) &&
-    //                 score.getAcademicYear().equals(sc.getAcademicYear())
-    //             );
-    //         if (hasSubject) {
-    //             StudentDTO dto = studentConverter.toDto(student);
-    //             dto.setAcademicYear(sc.getAcademicYear());
-    //             dto.setClassName(sc.getClazz().getClassName());
-    //             result.add(dto);
-    //         }
-    //     }
-    //     return result;
-    // }
+    
+    @Transactional(readOnly = true)
+    public List<StudentDTO> findStudentsBySubject(String subjectId, String academicYear, int semester) {
+        List<Student> students = studentRepository.findAll();
+        List<StudentDTO> result = new ArrayList<>();
+        for (Student student : students) {
+            boolean hasScore = student.getScores().stream().anyMatch(score ->
+                String.valueOf(score.getSubject().getId()).equals(subjectId)
+                && score.getSemester() == semester
+                && score.getAcademicYear().equals(academicYear)
+            );
+            if (hasScore) {
+                StudentDTO dto = studentConverter.toDto(student);
+                // Lấy lớp học mới nhất của sinh viên (nếu có)
+                List<StudentClass> studentClasses = studentClassRepository.findByStudentOrderByAcademicYearDesc(student);
+                if (!studentClasses.isEmpty()) {
+                    StudentClass latestClass = studentClasses.get(0);
+                    dto.setClassName(latestClass.getClazz().getClassName());
+                }
+                result.add(dto);
+            }
+        }
+        return result;
+    }
 }
