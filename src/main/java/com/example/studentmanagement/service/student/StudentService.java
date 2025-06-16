@@ -3,7 +3,6 @@ package com.example.studentmanagement.service.student;
 import com.example.studentmanagement.converter.StudentConverter;
 import com.example.studentmanagement.designpattern.iterator.IStudentIterator;
 import com.example.studentmanagement.dto.student.StudentDTO;
-import com.example.studentmanagement.enums.StudentStatus;
 import com.example.studentmanagement.enums.StudyStatus;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.model.StudentClass;
@@ -136,4 +135,29 @@ public class StudentService {
         }
         return dto;
     }
+
+    // @Transactional(readOnly = true)
+    // public List<StudentDTO> findStudentsByClassAndSubject(String classId, String subjectId) {
+    //     // Lấy tất cả StudentClass thuộc classId
+    //     List<StudentClass> studentClasses = studentClassRepository.findByClazz_Id(classId);
+
+    //     List<StudentDTO> result = new ArrayList<>();
+    //     for (StudentClass sc : studentClasses) {
+    //         Student student = sc.getStudent();
+    //         // Kiểm tra học sinh này có học môn subjectId không
+    //         boolean hasSubject = student.getScores().stream()
+    //             .anyMatch(score -> 
+    //                 score.getSubject() != null &&
+    //                 String.valueOf(score.getSubject().getId()).equals(subjectId) &&
+    //                 score.getAcademicYear().equals(sc.getAcademicYear())
+    //             );
+    //         if (hasSubject) {
+    //             StudentDTO dto = studentConverter.toDto(student);
+    //             dto.setAcademicYear(sc.getAcademicYear());
+    //             dto.setClassName(sc.getClazz().getClassName());
+    //             result.add(dto);
+    //         }
+    //     }
+    //     return result;
+    // }
 }

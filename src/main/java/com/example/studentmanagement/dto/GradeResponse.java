@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GradeResponse {
+    private String subjectId;
     private String subjectName;
     private Float score15m1;
     private Float score15m2;

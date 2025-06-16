@@ -1,8 +1,8 @@
 package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.student.StudentDTO;
-import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.service.student.StudentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,10 +12,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/students")
+@RequiredArgsConstructor
 public class StudentController {
-
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
 
     @PutMapping("/{id}/study")
     public ResponseEntity<?> studyStudent(@PathVariable String id) {
@@ -134,8 +133,17 @@ public class StudentController {
     private com.example.studentmanagement.repository.ScoreRepository scoreRepository;
 
     @GetMapping("/by-teacher/{teacherId}")
-    public ResponseEntity<List<Student>> getStudentsByTeacher(@PathVariable String teacherId) {
-        List<Student> students = scoreRepository.findStudentsByTeacherId(teacherId);
+    public ResponseEntity<List<StudentDTO>> getStudentsByTeacher(@PathVariable String teacherId) {
+        List<StudentDTO> students = scoreRepository.findStudentDTOsByTeacherId(teacherId);
         return ResponseEntity.ok(students);
     }
+
+    // @GetMapping("/by-class-and-subject")
+    // public ResponseEntity<?> getStudentsByClassAndSubject(
+    //         @RequestParam String classId,
+    //         @RequestParam String subjectId
+    // ) {
+    //     List<StudentDTO> students = studentService.findStudentsByClassAndSubject(classId, subjectId);
+    //     return ResponseEntity.ok(students);
+    // }
 }

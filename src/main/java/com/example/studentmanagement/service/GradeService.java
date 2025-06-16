@@ -41,7 +41,8 @@ public class GradeService {
         List<Score> scores = gradeBookProxy.getGrades(user, targetStudent, semester, academicYear);
 
         return scores.stream().map(score -> new GradeResponse(
-                score.getSubject().getName(),
+                String.valueOf(score.getSubject().getId()),
+                score.getSubject().getSubjectName(),
                 score.getScore15m1(),
                 score.getScore15m2(),
                 score.getScore1h1(),
@@ -52,4 +53,35 @@ public class GradeService {
                 score.getComments()
         )).collect(Collectors.toList());
     }
+
+    // public List<GradeResponse> getGradesForStudent(String studentId, int semester, String academicYear) {
+    //     List<Score> scores = studentRepository.findById(studentId)
+    //             .orElseThrow(() -> new RuntimeException("Không tìm thấy học sinh"))
+    //             .getScores().stream()
+    //             .filter(score -> score.getSemester() == semester && score.getAcademicYear().equals(academicYear))
+    //             .collect(Collectors.toList());
+
+    //     // Lọc trùng theo subjectId, semester, academicYear
+    //     Map<String, Score> uniqueScoreMap = new LinkedHashMap<>();
+    //     for (Score score : scores) {
+    //         String key = score.getSubject().getId() + "-" + score.getSemester() + "-" + score.getAcademicYear();
+    //         if (!uniqueScoreMap.containsKey(key)) {
+    //             uniqueScoreMap.put(key, score);
+    //         }
+    //     }
+    //     return uniqueScoreMap.values().stream()
+    //             .map(score -> new GradeResponse(
+    //                     String.valueOf(score.getSubject().getId()),
+    //                     score.getSubject().getSubjectName(),
+    //                     score.getScore15m1(),
+    //                     score.getScore15m2(),
+    //                     score.getScore1h1(),
+    //                     score.getScore1h2(),
+    //                     score.getFinalScore(),
+    //                     score.getSemester(),
+    //                     score.getAcademicYear(),
+    //                     score.getComments()
+    //             ))
+    //             .collect(Collectors.toList());
+    // }
 }

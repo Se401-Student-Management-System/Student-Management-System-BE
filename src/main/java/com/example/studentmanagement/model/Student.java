@@ -225,8 +225,4 @@ public class Student implements GradeInterface, UserEntity {
     public void setEthnicity(String ethnicity) {
         this.ethnicity = ethnicity;
     }
-
-    public String getFullName() {
-        return account != null ? account.getFullName() : null;
-    }
 }

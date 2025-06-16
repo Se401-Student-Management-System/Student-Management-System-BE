@@ -1,6 +1,7 @@
 package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.teacher.ScoreRequest;
+import com.example.studentmanagement.dto.teacher.SubjectDTO;
 import com.example.studentmanagement.model.Score;
 import com.example.studentmanagement.model.Teacher;
 import com.example.studentmanagement.repository.TeacherRepository;
@@ -33,6 +34,19 @@ public class TeacherController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/subjects")
+    public ResponseEntity<?> getSubjectsByTeacher(
+            @RequestParam String teacherId,
+            @RequestParam String year,
+            @RequestParam int semester
+    ) {
+        List<Object[]> subjects = scoreService.getSubjectsByTeacher(teacherId, year, semester);
+        List<SubjectDTO> result = subjects.stream()
+            .map(obj -> new SubjectDTO(String.valueOf(obj[0]), (String) obj[1]))
+            .toList();
+        return ResponseEntity.ok(result);
     }
 
     private Teacher getCurrentTeacher() {

@@ -6,6 +6,7 @@ import com.example.studentmanagement.model.Score;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.model.Subject;
 import com.example.studentmanagement.model.Teacher;
+import com.example.studentmanagement.repository.AssignmentRepository;
 import com.example.studentmanagement.repository.ScoreRepository;
 import com.example.studentmanagement.repository.StudentRepository;
 import com.example.studentmanagement.repository.SubjectRepository;
@@ -30,6 +31,9 @@ public class ScoreService {
 
     @Autowired
     private ScorePublisher scorePublisher;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
 
     public List<Score> enterScores(ScoreRequest scoreRequest, Teacher teacher) {
         if (scoreRequest.getScores() == null || scoreRequest.getScores().isEmpty()) {
@@ -117,5 +121,9 @@ public class ScoreService {
             hasChanges = true;
         }
         return hasChanges;
+    }
+
+    public List<Object[]> getSubjectsByTeacher(String teacherId, String year, int semester) {
+        return assignmentRepository.findSubjectsByTeacher(teacherId, year, semester);
     }
 }
