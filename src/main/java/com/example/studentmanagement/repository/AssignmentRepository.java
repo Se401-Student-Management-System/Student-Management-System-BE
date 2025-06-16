@@ -11,6 +11,11 @@ import java.util.List;
 @Repository
 public interface AssignmentRepository extends JpaRepository<Assignment, Integer> {
 
+    List<Assignment> findByTeacherId(String teacherId);
+
+    @Query("SELECT a FROM Assignment a WHERE a.teacher.id = ?1 AND a.semester = ?2 AND a.academicYear = ?3")
+    List<Assignment> findByTeacherIdAndSemesterAndAcademicYear(String teacherId, Integer semester, String academicYear);
+
     // Truy vấn tự động: tìm tất cả phân công giảng dạy theo lớp, học kỳ, năm học
     List<Assignment> findByClazzAndSemesterAndAcademicYear(Class clazz, Integer semester, String academicYear);
 

@@ -48,4 +48,26 @@ public interface ScoreRepository extends JpaRepository<Score, Integer> {
            "JOIN StudentClass sc ON sc.student.id = s.student.id AND sc.academicYear = s.academicYear " +
            "WHERE s.teacher.id = :teacherId")
     List<StudentDTO> findStudentDTOsByTeacherId(@Param("teacherId") String teacherId);
+
+    @Query("SELECT s FROM Score s " +
+           "JOIN s.student st " +
+           "JOIN st.account a " +
+           "JOIN s.teacher t " +
+           "JOIN s.subject sub " +
+           "JOIN st.studentClasses sc " +
+           "JOIN sc.clazz c " +
+           "JOIN t.account ta " +
+           "WHERE t.id = :teacherId " +
+           "AND c.className = :className " +
+           "AND sub.subjectName = :subjectName " +
+           "AND s.semester = :semester " +
+           "AND s.academicYear = :academicYear " +
+           "AND sc.academicYear = :academicYear") // Đảm bảo khớp năm học
+    List<Score> findScoreInputDetail(
+        @Param("teacherId") String teacherId,
+        @Param("className") String className,
+        @Param("subjectName") String subjectName,
+        @Param("semester") Integer semester,
+        @Param("academicYear") String academicYear
+    );
 }

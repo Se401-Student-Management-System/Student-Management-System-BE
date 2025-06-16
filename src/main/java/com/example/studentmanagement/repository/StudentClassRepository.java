@@ -32,4 +32,6 @@ public interface StudentClassRepository extends JpaRepository<StudentClass, Inte
     List<StudentClass> findByStudentOrderByAcademicYearDesc(Student student);
 
     // List<StudentClass> findByClazz_Id(String classId);
+    @Query("SELECT sc FROM StudentClass sc WHERE sc.clazz.id = :classId AND sc.academicYear = :academicYear")
+    List<StudentClass> findByClassIdAndAcademicYear(Integer classId, String academicYear);
 }

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Student implements GradeInterface, UserEntity {
     @Id
     @Column(length = 10)
@@ -57,13 +57,16 @@ public class Student implements GradeInterface, UserEntity {
     @JsonIgnoreProperties("student")
     private List<Score> scores = new ArrayList<>();
 
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("student")
+    private List<StudentClass> studentClasses = new ArrayList<>(); // Thêm mối quan hệ với StudentClass
+
     public Student(String id, Account account, String ethnicity, String birthPlace, StudyStatus status) {
         this.id = id;
         this.account = account;
         this.ethnicity = ethnicity;
         this.birthPlace = birthPlace;
         this.status = status;
-
         initStates();
     }
 
@@ -94,7 +97,15 @@ public class Student implements GradeInterface, UserEntity {
     public void setScores(List<Score> scores) {
         this.scores = scores;
     }
-   
+
+    public List<StudentClass> getStudentClasses() {
+        return studentClasses;
+    }
+
+    public void setStudentClasses(List<StudentClass> studentClasses) {
+        this.studentClasses = studentClasses;
+    }
+
     private void initStates() {
         this.activeState = new ActiveState(this);
         this.pendingState = new PendingState(this);
@@ -135,38 +146,32 @@ public class Student implements GradeInterface, UserEntity {
     }
 
     public void performStudy() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.study(this);
     }
 
     public void performSuspend() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.suspend(this);
     }
 
     public void performWarn() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.warn(this);
     }
 
     public void performActivate() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.activate(this);
     }
 
     public void performEnroll() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.enroll(this);
     }
 
     public void performLeave() {
-        if (this.currentState == null)
-            setInitialState();
+        if (this.currentState == null) setInitialState();
         this.currentState.leave(this);
     }
 
