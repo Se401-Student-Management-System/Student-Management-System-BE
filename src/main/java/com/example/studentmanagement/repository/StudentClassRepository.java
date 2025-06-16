@@ -5,6 +5,7 @@ import com.example.studentmanagement.model.StudentClass;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 import com.example.studentmanagement.model.Class;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public interface StudentClassRepository extends JpaRepository<StudentClass, Inte
 
     // Tìm danh sách StudentClass theo tên lớp và năm học
     @Query("SELECT sc FROM StudentClass sc WHERE sc.clazz.className = :className AND sc.academicYear = :academicYear")
-    List<StudentClass> findByClassNameAndAcademicYear(String className, String academicYear);
+    List<StudentClass> findByClassNameAndAcademicYear(@Param("className") String className, @Param("academicYear") String academicYear);
 
     Optional<StudentClass> findByStudentAndClazzAndAcademicYear(Student student, Class clazz, String academicYear);
 

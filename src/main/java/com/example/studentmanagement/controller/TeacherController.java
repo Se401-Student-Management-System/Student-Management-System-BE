@@ -44,7 +44,7 @@ public class TeacherController {
     ) {
         List<Object[]> subjects = scoreService.getSubjectsByTeacher(teacherId, year, semester);
         List<SubjectDTO> result = subjects.stream()
-            .map(obj -> new SubjectDTO(String.valueOf(obj[0]), (String) obj[1]))
+            .map(obj -> new SubjectDTO(String.valueOf(obj[0]), (String) obj[1], (String) obj[2]))
             .toList();
         return ResponseEntity.ok(result);
     }

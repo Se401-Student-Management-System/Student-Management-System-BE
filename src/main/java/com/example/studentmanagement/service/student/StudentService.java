@@ -159,4 +159,24 @@ public class StudentService {
         }
         return result;
     }
+
+    @Transactional(readOnly = true)
+    public List<StudentDTO> findStudentsByClassAndSubject(String className, String subjectId, String academicYear, int semester) {
+        List<StudentClass> studentClasses = studentClassRepository.findByClassNameAndAcademicYear(className, academicYear);
+        List<StudentDTO> result = new ArrayList<>();
+        for (StudentClass sc : studentClasses) {
+            Student student = sc.getStudent();
+            boolean hasScore = student.getScores().stream().anyMatch(score ->
+                String.valueOf(score.getSubject().getId()).equals(subjectId)
+                && score.getSemester() == semester
+                && score.getAcademicYear().equals(academicYear)
+            );
+            if (hasScore) {
+                StudentDTO dto = studentConverter.toDto(student);
+                dto.setClassName(className);
+                result.add(dto);
+            }
+        }
+        return result;
+    }
 }

@@ -137,13 +137,24 @@ public class StudentController {
     //     return ResponseEntity.ok(students);
     // }
 
-    @GetMapping("/by-subject")
-    public ResponseEntity<List<StudentDTO>> getStudentsBySubject(
+    // @GetMapping("/by-subject")
+    // public ResponseEntity<List<StudentDTO>> getStudentsBySubject(
+    //         @RequestParam String subjectId,
+    //         @RequestParam String academicYear,
+    //         @RequestParam int semester
+    // ) {
+    //     List<StudentDTO> students = studentService.findStudentsBySubject(subjectId, academicYear, semester);
+    //     return ResponseEntity.ok(students);
+    // }
+
+    @GetMapping("/by-class-and-subject")
+    public ResponseEntity<List<StudentDTO>> getStudentsByClassAndSubject(
+            @RequestParam String className,
             @RequestParam String subjectId,
             @RequestParam String academicYear,
             @RequestParam int semester
     ) {
-        List<StudentDTO> students = studentService.findStudentsBySubject(subjectId, academicYear, semester);
+        List<StudentDTO> students = studentService.findStudentsByClassAndSubject(className, subjectId, academicYear, semester);
         return ResponseEntity.ok(students);
     }
 }
