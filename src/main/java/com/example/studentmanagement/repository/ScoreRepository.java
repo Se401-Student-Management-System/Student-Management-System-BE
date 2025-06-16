@@ -70,4 +70,23 @@ public interface ScoreRepository extends JpaRepository<Score, Integer> {
         @Param("semester") Integer semester,
         @Param("academicYear") String academicYear
     );
+
+    @Query("SELECT s FROM Score s " +
+           "JOIN s.student st " +
+           "JOIN st.account a " +
+           "JOIN s.teacher t " +
+           "JOIN s.subject sub " +
+           "JOIN st.studentClasses sc " +
+           "JOIN sc.clazz c " +
+           "WHERE t.id = :teacherId " +
+           "AND c.className = :className " +
+           "AND s.semester = :semester " +
+           "AND s.academicYear = :academicYear " +
+           "AND sc.academicYear = :academicYear")
+    List<Score> findScoresForEvaluation(
+        @Param("teacherId") String teacherId,
+        @Param("className") String className,
+        @Param("semester") Integer semester,
+        @Param("academicYear") String academicYear
+    );
 }

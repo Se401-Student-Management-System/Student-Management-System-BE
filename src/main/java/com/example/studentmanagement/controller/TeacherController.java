@@ -1,13 +1,14 @@
 package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.teacher.ScoreInputDetailDTO;
-import com.example.studentmanagement.dto.teacher.ScoreInputInfo;
 import com.example.studentmanagement.dto.teacher.ScoreRequest;
 import com.example.studentmanagement.dto.teacher.SubjectDTO;
 import com.example.studentmanagement.model.Score;
 import com.example.studentmanagement.model.Teacher;
 import com.example.studentmanagement.repository.TeacherRepository;
 import com.example.studentmanagement.service.teacher.ScoreService;
+import com.example.studentmanagement.service.teacher.TeacherEvaluationService;
+import com.example.studentmanagement.service.teacher.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,13 @@ public class TeacherController {
     private ScoreService scoreService;
 
     @Autowired
+    private TeacherService teacherService;
+
+    @Autowired
     private TeacherRepository teacherRepository;
+    
+    @Autowired
+    private TeacherEvaluationService evaluationService;
 
     @PostMapping("/enter-scores")
     public ResponseEntity<?> enterScores(@RequestBody ScoreRequest scoreRequest) {
@@ -57,7 +64,6 @@ public class TeacherController {
             @RequestParam(value = "semester", required = false, defaultValue = "1") Integer semester,
             @RequestParam(value = "year", required = false) String year) {
         try {
-            // Giả định lấy teacherId từ session hoặc token (sử dụng "GV001" như ví dụ)
             String teacherId = "GV001";
             Map<String, Object> response = scoreService.getScoreInputInfo(teacherId, semester, year);
             return ResponseEntity.ok(Map.of(
@@ -81,21 +87,45 @@ public class TeacherController {
     }
 
     @GetMapping("/enter-next")
-    @ResponseBody
     public List<ScoreInputDetailDTO> enterNextApi(
             @RequestParam(value = "teacherId", required = false) String teacherId,
             @RequestParam(value = "className", required = false) String className,
             @RequestParam(value = "subjectName", required = false) String subjectName,
             @RequestParam(value = "semester", required = false, defaultValue = "1") Integer semester,
             @RequestParam(value = "academicYear", required = false) String academicYear) {
-
         if (teacherId == null) {
             teacherId = "GV001";
         }
-
         return scoreService.getScoreInputDetail(teacherId, className, subjectName, semester, academicYear);
     }
 
+    @PostMapping("/add-comments")
+    public ResponseEntity<?> addComments(@RequestBody List<TeacherService.CommentRequest> commentRequests) {
+        try {
+            Teacher teacher = getCurrentTeacher();
+            teacherService.addComments(commentRequests, teacher);
+            return ResponseEntity.ok(Map.of("message", "Cập nhật nhận xét thành công!"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", "Lỗi hệ thống: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/class-rate")
+    public ResponseEntity<?> getClassRate(
+            @RequestParam(value = "year", required = false) String selectedYear,
+            @RequestParam(value = "semester", required = false, defaultValue = "Học kỳ 1") String selectedSemester,
+            @RequestParam(value = "class", required = false) String selectedClass) {
+
+        try {
+            Map<String, Object> response = evaluationService.getStudentListForEvaluation(selectedYear, selectedSemester, selectedClass);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
     private Teacher getCurrentTeacher() {
         Optional<Teacher> teacher = teacherRepository.findById("GV001");
         return teacher.orElseThrow(() -> new IllegalArgumentException("Giáo viên GV001 không tồn tại trong database"));
