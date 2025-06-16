@@ -18,4 +18,8 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Integer>
     @Query("SELECT DISTINCT a.subject.id FROM Assignment a " +
         "WHERE a.clazz.className LIKE ?1 AND a.semester = ?2 AND a.academicYear = ?3")
     List<Integer> findAssignedSubjectIds(String gradePrefix, int semester, String academicYear);
+
+    @Query("SELECT DISTINCT a.subject.id, a.subject.subjectName, a.clazz.className FROM Assignment a " +
+       "WHERE a.teacher.id = ?1 AND a.academicYear = ?2 AND a.semester = ?3")
+    List<Object[]> findSubjectsByTeacher(String teacherId, String academicYear, int semester);
 }

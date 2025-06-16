@@ -7,17 +7,21 @@ import com.example.studentmanagement.designpattern.state.StudentState;
 import com.example.studentmanagement.designpattern.state.StudentStateFactory;
 import com.example.studentmanagement.designpattern.state.WarningState;
 import com.example.studentmanagement.enums.StudyStatus;
+import com.example.studentmanagement.designpattern.proxy.GradeInterface;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Student implements UserEntity {
+
+public class Student implements GradeInterface, UserEntity {
     @Id
     @Column(length = 10)
     private String id;
@@ -49,6 +53,10 @@ public class Student implements UserEntity {
     @Transient
     private InactiveState inactiveState;
 
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("student")
+    private List<Score> scores = new ArrayList<>();
+
     public Student(String id, Account account, String ethnicity, String birthPlace, StudyStatus status) {
         this.id = id;
         this.account = account;
@@ -56,17 +64,37 @@ public class Student implements UserEntity {
         this.birthPlace = birthPlace;
         this.status = status;
 
-        // Khởi tạo các thể hiện của các trạng thái cụ thể
         initStates();
     }
 
     public Student(String id) {
         this.id = id;
         this.status = StudyStatus.PENDING;
-        initStates(); // Khởi tạo các state objects
-        setInitialState(); // Thiết lập currentState
+        initStates();
+        setInitialState();
     }
 
+    @Override
+    public String getRole() {
+        return "STUDENT";
+    }
+
+    @Override
+    public boolean isAuthorized(UserEntity user) {
+        if (user instanceof Student) {
+            return this.getId().equals(((Student) user).getId());
+        }
+        return false;
+    }
+
+    public List<Score> getScores() {
+        return scores;
+    }
+
+    public void setScores(List<Score> scores) {
+        this.scores = scores;
+    }
+   
     private void initStates() {
         this.activeState = new ActiveState(this);
         this.pendingState = new PendingState(this);
@@ -106,7 +134,6 @@ public class Student implements UserEntity {
         return currentState;
     }
 
-    // Đây là nơi Student ủy quyền hành động cho đối tượng trạng thái hiện tại
     public void performStudy() {
         if (this.currentState == null)
             setInitialState();

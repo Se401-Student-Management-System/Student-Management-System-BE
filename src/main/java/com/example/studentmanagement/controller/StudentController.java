@@ -1,25 +1,19 @@
 package com.example.studentmanagement.controller;
 
-import com.example.studentmanagement.converter.StudentConverter;
-import com.example.studentmanagement.designpattern.iterator.IStudentIterator;
 import com.example.studentmanagement.dto.student.StudentDTO;
-import com.example.studentmanagement.model.Student;
-import com.example.studentmanagement.service.student.StudentManager;
 import com.example.studentmanagement.service.student.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/students")
+@RequiredArgsConstructor
 public class StudentController {
-
-    @Autowired
-    private StudentService studentService;
+    private final StudentService studentService;
 
     @PutMapping("/{id}/study")
     public ResponseEntity<?> studyStudent(@PathVariable String id) {
@@ -112,12 +106,6 @@ public class StudentController {
     }
 
 //    ITERATOR
-    @Autowired
-    private StudentManager studentManager;
-
-    @Autowired
-    private StudentConverter studentConverter;
-
     @GetMapping("/list-all")
     public ResponseEntity<List<StudentDTO>> getAllStudentsUsingIterator() {
         try {
@@ -138,5 +126,35 @@ public class StudentController {
             return ResponseEntity.noContent().build(); // HTTP 204 No Content nếu không có sinh viên
         }
         return ResponseEntity.ok(studentDTOList); // Trả về danh sách StudentDTO
+    }
+
+    // @Autowired
+    // private com.example.studentmanagement.repository.ScoreRepository scoreRepository;
+
+    // @GetMapping("/by-teacher/{teacherId}")
+    // public ResponseEntity<List<StudentDTO>> getStudentsByTeacher(@PathVariable String teacherId) {
+    //     List<StudentDTO> students = scoreRepository.findStudentDTOsByTeacherId(teacherId);
+    //     return ResponseEntity.ok(students);
+    // }
+
+    // @GetMapping("/by-subject")
+    // public ResponseEntity<List<StudentDTO>> getStudentsBySubject(
+    //         @RequestParam String subjectId,
+    //         @RequestParam String academicYear,
+    //         @RequestParam int semester
+    // ) {
+    //     List<StudentDTO> students = studentService.findStudentsBySubject(subjectId, academicYear, semester);
+    //     return ResponseEntity.ok(students);
+    // }
+
+    @GetMapping("/by-class-and-subject")
+    public ResponseEntity<List<StudentDTO>> getStudentsByClassAndSubject(
+            @RequestParam String className,
+            @RequestParam String subjectId,
+            @RequestParam String academicYear,
+            @RequestParam int semester
+    ) {
+        List<StudentDTO> students = studentService.findStudentsByClassAndSubject(className, subjectId, academicYear, semester);
+        return ResponseEntity.ok(students);
     }
 }

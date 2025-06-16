@@ -50,6 +50,14 @@ public class Account {
     @JsonIgnoreProperties("accounts")
     private Role role;
 
+    @OneToOne(mappedBy = "account")
+    @JsonIgnoreProperties({"account", "scores"})
+    private Student student;
+
+    @OneToOne(mappedBy = "account")
+    @JsonIgnoreProperties({"account", "scores"})
+    private Teacher teacher;
+
     public enum Gender {
         Nam,
         Nữ

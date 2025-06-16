@@ -1,11 +1,8 @@
 package com.example.studentmanagement.designpattern.facade;
 
-import com.example.studentmanagement.dto.director.GradeStatisticDTO;
-import com.example.studentmanagement.dto.director.TopScoreStudentDTO;
 import com.example.studentmanagement.service.director.StudentConductStatics;
 import com.example.studentmanagement.service.director.StudentNumberStatics;
 import com.example.studentmanagement.service.director.StudentScoreStatics;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -18,7 +15,6 @@ public class StudentManagementFacade {
     private final StudentNumberStatics studentNumberStatics;
     private final StudentConductStatics studentConductStatics;
 
-    @Autowired
     public StudentManagementFacade(StudentScoreStatics studentScoreStatics,
                                    StudentNumberStatics studentNumberStatics,
                                    StudentConductStatics studentConductStatics) {

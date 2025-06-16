@@ -3,7 +3,6 @@ package com.example.studentmanagement.service.student;
 import com.example.studentmanagement.converter.StudentConverter;
 import com.example.studentmanagement.designpattern.iterator.IStudentIterator;
 import com.example.studentmanagement.dto.student.StudentDTO;
-import com.example.studentmanagement.enums.StudentStatus;
 import com.example.studentmanagement.enums.StudyStatus;
 import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.model.StudentClass;
@@ -135,5 +134,49 @@ public class StudentService {
             dto.setClassName(latestClass.getClazz().getClassName()); 
         }
         return dto;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<StudentDTO> findStudentsBySubject(String subjectId, String academicYear, int semester) {
+        List<Student> students = studentRepository.findAll();
+        List<StudentDTO> result = new ArrayList<>();
+        for (Student student : students) {
+            boolean hasScore = student.getScores().stream().anyMatch(score ->
+                String.valueOf(score.getSubject().getId()).equals(subjectId)
+                && score.getSemester() == semester
+                && score.getAcademicYear().equals(academicYear)
+            );
+            if (hasScore) {
+                StudentDTO dto = studentConverter.toDto(student);
+                // Lấy lớp học mới nhất của sinh viên (nếu có)
+                List<StudentClass> studentClasses = studentClassRepository.findByStudentOrderByAcademicYearDesc(student);
+                if (!studentClasses.isEmpty()) {
+                    StudentClass latestClass = studentClasses.get(0);
+                    dto.setClassName(latestClass.getClazz().getClassName());
+                }
+                result.add(dto);
+            }
+        }
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    public List<StudentDTO> findStudentsByClassAndSubject(String className, String subjectId, String academicYear, int semester) {
+        List<StudentClass> studentClasses = studentClassRepository.findByClassNameAndAcademicYear(className, academicYear);
+        List<StudentDTO> result = new ArrayList<>();
+        for (StudentClass sc : studentClasses) {
+            Student student = sc.getStudent();
+            boolean hasScore = student.getScores().stream().anyMatch(score ->
+                String.valueOf(score.getSubject().getId()).equals(subjectId)
+                && score.getSemester() == semester
+                && score.getAcademicYear().equals(academicYear)
+            );
+            if (hasScore) {
+                StudentDTO dto = studentConverter.toDto(student);
+                dto.setClassName(className);
+                result.add(dto);
+            }
+        }
+        return result;
     }
 }

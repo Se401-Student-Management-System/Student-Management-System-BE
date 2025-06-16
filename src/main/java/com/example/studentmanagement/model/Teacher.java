@@ -4,17 +4,20 @@ import com.example.studentmanagement.converter.TeacherPositionConverter;
 import com.example.studentmanagement.converter.TeachingStatusConverter;
 import com.example.studentmanagement.enums.TeacherPosition;
 import com.example.studentmanagement.enums.TeachingStatus;
+import com.example.studentmanagement.designpattern.proxy.GradeInterface;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Entity
 @Table(name = "teacher")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Teacher implements UserEntity {
 
+public class Teacher implements GradeInterface, UserEntity {
     @Id
     @Column(length = 10)
     private String id;
@@ -36,6 +39,11 @@ public class Teacher implements UserEntity {
         this.status = TeachingStatus.DANG_GIANG_DAY;
     }
 
+    @Override
+    public String getRole(){
+        return "TEACHER";
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public Account getAccount() { return account; }
@@ -45,4 +53,24 @@ public class Teacher implements UserEntity {
 
     public TeacherPosition getPosition() { return position; }
     public void setPosition(TeacherPosition position) { this.position = position; }
+
+    @Override
+    public boolean isAuthorized(UserEntity user) {
+        if (user instanceof Teacher) {
+            return this.getId().equals(((Teacher) user).getId());
+        }
+        if (user instanceof Student) {
+            return false;
+        }
+        return false;
+    }
+
+    public void checkIfTeaching(Student student) {
+        boolean isTeaching = student.getScores().stream()
+            .anyMatch(score -> score.getTeacher().getId().equals(this.getId()));
+
+        if (!isTeaching) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bạn không dạy học sinh này, không thể xem điểm.");
+        }
+    }
 }

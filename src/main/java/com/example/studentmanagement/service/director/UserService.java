@@ -16,7 +16,6 @@ import com.example.studentmanagement.repository.StudentRepository;
 import com.example.studentmanagement.repository.TeacherRepository;
 import com.example.studentmanagement.repository.CashierRepository;
 import com.example.studentmanagement.repository.SupervisorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -32,7 +31,6 @@ public class UserService {
     private final SupervisorRepository supervisorRepo;
     private final Map<String, UserFactory> factoryMap;
 
-    @Autowired
     public UserService(AccountService accountService,
                        StudentRepository studentRepo,
                        TeacherRepository teacherRepo,

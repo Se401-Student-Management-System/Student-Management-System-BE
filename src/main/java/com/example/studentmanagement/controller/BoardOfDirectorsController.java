@@ -38,7 +38,6 @@ public class BoardOfDirectorsController {
     @Autowired
     private StudentPaymentService studentPaymentService;
 
-    @Autowired
     public BoardOfDirectorsController(SchoolRecordDirector director, StudentManagementFacade facade,
                                      UserService userService, AccountService accountService) {
         this.director = director;
