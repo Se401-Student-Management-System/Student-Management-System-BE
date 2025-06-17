@@ -6,12 +6,11 @@ import com.example.studentmanagement.designpattern.command.ExportPaymentRecordTo
 import com.example.studentmanagement.designpattern.command.PaymentCommand;
 import com.example.studentmanagement.designpattern.command.PaymentInvoker;
 import com.example.studentmanagement.designpattern.command.StatisticsPaymentRecordCommand;
+import com.example.studentmanagement.dto.cashier.InvoiceDetailDTO;
 import com.example.studentmanagement.dto.cashier.PaymentRecordDTO;
+import com.example.studentmanagement.dto.cashier.PaymentRequestDTO;
 import com.example.studentmanagement.dto.cashier.PaymentStatisticsDTO;
-import com.example.studentmanagement.model.Cashier;
-import com.example.studentmanagement.repository.CashierRepository;
 import com.example.studentmanagement.service.cashier.PaymentReceiptService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,30 +22,38 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cashier")
+@CrossOrigin(origins = "http://localhost:3000")
 public class CashierController {
 
     @Autowired
     private PaymentReceiptService paymentReceiptService;
 
     @Autowired
-    private CashierRepository cashierRepository;
-
-    @Autowired
     private PaymentInvoker invoker;
 
-    @PostMapping("/add-payment")
-    public ResponseEntity<String> addPayment(
-            @RequestParam String cashierId,
-            @RequestParam String invoiceId,
-            @RequestParam float amount) {
+    @GetMapping("/invoices/{invoiceId}")
+    public ResponseEntity<InvoiceDetailDTO> getInvoiceDetail(@PathVariable Integer invoiceId) {
         try {
-            Cashier cashier = cashierRepository.findById(cashierId)
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thu ngân: " + cashierId));
+            InvoiceDetailDTO invoice = paymentReceiptService.getInvoiceById(invoiceId);
+            if (invoice == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+            return ResponseEntity.ok(invoice);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
-            PaymentCommand addCommand = new AddPaymentRecordCommand(cashier, paymentReceiptService, invoiceId, amount);
-            invoker.addCommand(addCommand);
-            invoker.runCommands();
-
+    @PostMapping("/add-payment")
+    public ResponseEntity<String> addPayment(@RequestBody PaymentRequestDTO paymentRequest) {
+        try {
+            paymentReceiptService.addPaymentRecord(
+                paymentRequest.getCashierId(),
+                paymentRequest.getInvoiceId(),
+                paymentRequest.getAmount()
+            );
             return ResponseEntity.ok("Thêm thanh toán thành công");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Thêm thanh toán thất bại: " + e.getMessage());
@@ -55,6 +62,27 @@ public class CashierController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Thêm thanh toán thất bại: Lỗi hệ thống - " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/invoices")
+    public ResponseEntity<List<InvoiceDetailDTO>> getInvoices(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "2024-2025") String academicYear) {
+        try {
+            if (status != null && !List.of("Đã thanh toán", "Chưa thanh toán", "Thanh toán 1 phần").contains(status)) {
+                return ResponseEntity.badRequest().body(null);
+            }
+            if (academicYear != null && !academicYear.matches("\\d{4}-\\d{4}")) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            List<InvoiceDetailDTO> invoices = paymentReceiptService.getAllInvoices(status, academicYear);
+            return ResponseEntity.ok(invoices);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -77,18 +105,18 @@ public class CashierController {
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String status) {
         try {
-            // Kiểm tra trạng thái hợp lệ
-            if (status != null && !status.isEmpty() && !status.equals("Đã thanh toán") && !status.equals("Chưa thanh toán") && !status.equals("Thanh toán 1 phần")) {
+            if (status != null && !status.isEmpty() &&
+                    !status.equals("Đã thanh toán") &&
+                    !status.equals("Chưa thanh toán") &&
+                    !status.equals("Thanh toán 1 phần")) {
                 throw new IllegalArgumentException("Trạng thái không hợp lệ: " + status);
             }
 
-            // Thực thi command để lấy dữ liệu thô
             PaymentCommand exportDataCommand = new ExportPaymentRecordCommand(paymentReceiptService, academicYear, status);
             invoker.addCommand(exportDataCommand);
             invoker.runCommands();
             List<PaymentRecordDTO> records = ((ExportPaymentRecordCommand) exportDataCommand).getResult();
 
-            // Thực thi command để xuất Excel
             PaymentCommand exportExcelCommand = new ExportPaymentRecordToExcelCommand(records);
             invoker.addCommand(exportExcelCommand);
             invoker.runCommands();
