@@ -1,14 +1,16 @@
 package com.example.studentmanagement.service.cashier;
 
+import com.example.studentmanagement.dto.cashier.InvoiceDetailDTO;
 import com.example.studentmanagement.dto.cashier.PaymentRecordDTO;
 import com.example.studentmanagement.dto.cashier.PaymentStatisticsDTO;
 import com.example.studentmanagement.model.Cashier;
 import com.example.studentmanagement.model.Invoice;
 import com.example.studentmanagement.model.PaymentReceipt;
+import com.example.studentmanagement.model.Student;
 import com.example.studentmanagement.repository.CashierRepository;
 import com.example.studentmanagement.repository.InvoiceRepository;
 import com.example.studentmanagement.repository.PaymentReceiptRepository;
-import com.example.studentmanagement.model.Student;
+import com.example.studentmanagement.repository.StudentClassRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,49 +34,159 @@ public class PaymentReceiptService {
     @Autowired
     private CashierRepository cashierRepository;
 
+    @Autowired
+    private StudentClassRepository studentClassRepository;
+
     @Transactional
-    public PaymentReceipt addPaymentRecord(String invoiceId, String cashierId, float amount) {
+    public void addPaymentRecord(String cashierId, String invoiceId, float amount) {
+        Cashier cashier = cashierRepository.findById(cashierId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy thu ngân: " + cashierId));
+        Invoice invoice = invoiceRepository.findById(Integer.valueOf(invoiceId))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn: " + invoiceId));
+
         if (amount <= 0) {
             throw new IllegalArgumentException("Số tiền đóng không hợp lệ");
         }
-
-        Invoice invoice = invoiceRepository.findById(Integer.parseInt(invoiceId))
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found: " + invoiceId));
-
-        if ("Đã thanh toán".equals(invoice.getStatus())) {
-            throw new IllegalStateException("Invoice is already fully paid: " + invoiceId);
+        if (invoice.getOutstandingAmount() <= 0) {
+            throw new IllegalStateException("Hóa đơn đã được thanh toán đầy đủ: " + invoiceId);
+        }
+        if (amount > invoice.getOutstandingAmount()) {
+            throw new IllegalArgumentException("Số tiền vượt quá số tiền còn nợ");
         }
 
-        Cashier cashier = cashierRepository.findById(cashierId)
-                .orElseThrow(() -> new IllegalArgumentException("Cashier not found: " + cashierId));
+        PaymentReceipt paymentReceipt = new PaymentReceipt();
+        paymentReceipt.setCashier(cashier);
+        paymentReceipt.setInvoice(invoice);
+        paymentReceipt.setPaidAmount(amount);
+        paymentReceipt.setPaymentDate(LocalDate.now());
 
-        PaymentReceipt receipt = new PaymentReceipt();
-        receipt.setInvoice(invoice);
-        receipt.setCashier(cashier);
-        receipt.setPaidAmount(amount);
-        receipt.setPaymentDate(LocalDate.now());
-        PaymentReceipt savedReceipt = paymentReceiptRepository.save(receipt);
+        paymentReceiptRepository.save(paymentReceipt);
 
-        updateInvoice(invoice, amount);
-
-        return savedReceipt;
+        invoice.setPaidAmount(invoice.getPaidAmount() + amount);
+        invoice.setOutstandingAmount(invoice.getOutstandingAmount() - amount);
+        invoice.setStatus(invoice.getOutstandingAmount() == 0 ? "Đã thanh toán" : "Thanh toán 1 phần");
+        invoiceRepository.save(invoice);
     }
 
-    private void updateInvoice(Invoice invoice, float paymentAmount) {
-        float newPaidAmount = invoice.getPaidAmount() != null ? invoice.getPaidAmount() + paymentAmount : paymentAmount;
-        float debt = invoice.getTotalFee() - newPaidAmount;
-        String status;
-        if (newPaidAmount >= invoice.getTotalFee()) {
-            status = "Đã thanh toán";
-        } else if (newPaidAmount > 0) {
-            status = "Thanh toán 1 phần";
-        } else {
-            status = "Chưa thanh toán";
+    @Transactional(readOnly = true)
+    public List<InvoiceDetailDTO> getAllInvoices(String status, String academicYear) {
+        try {
+            List<Invoice> invoices;
+            if (status != null && academicYear != null) {
+                invoices = invoiceRepository.findByAcademicYearAndStatus(academicYear, status);
+            } else if (status != null) {
+                invoices = invoiceRepository.findByStatus(status);
+            } else if (academicYear != null) {
+                invoices = invoiceRepository.findByAcademicYear(academicYear);
+            } else {
+                invoices = invoiceRepository.findAll();
+            }
+
+            List<InvoiceDetailDTO> result = new ArrayList<>();
+            for (Invoice invoice : invoices) {
+                try {
+                    Student student = invoice.getStudent();
+                    String studentName = (student != null && student.getAccount() != null) ? student.getAccount().getFullName() : "Unknown";
+                    String className = "Unknown";
+
+                    if (student != null) {
+                        AtomicReference<String> tempClassName = new AtomicReference<>("Unknown");
+                        studentClassRepository.findByStudentAndAcademicYear(student, invoice.getAcademicYear())
+                            .ifPresent(sc -> {
+                                if (sc.getClazz() != null) {
+                                    tempClassName.set(sc.getClazz().getClassName());
+                                }
+                            });
+                        className = tempClassName.get();
+                    }
+
+                    LocalDate lastPaymentDate = null;
+                    try {
+                        List<PaymentReceipt> paymentReceipts = paymentReceiptRepository.findByInvoiceIdOrderByPaymentDateDesc(invoice.getId());
+                        if (!paymentReceipts.isEmpty()) {
+                            lastPaymentDate = paymentReceipts.get(0).getPaymentDate();
+                        }
+                    } catch (Exception ignored) {}
+
+                    InvoiceDetailDTO dto = new InvoiceDetailDTO(
+                        invoice.getId(),
+                        student != null ? student.getId() : null,
+                        studentName,
+                        className,
+                        invoice.getAcademicYear(),
+                        invoice.getTotalFee(),
+                        invoice.getPaidAmount(),
+                        invoice.getOutstandingAmount(),
+                        invoice.getStatus(),
+                        lastPaymentDate,
+                        null
+                    );
+                    result.add(dto);
+                } catch (Exception e) {
+                    InvoiceDetailDTO dto = new InvoiceDetailDTO(
+                        invoice.getId(),
+                        null,
+                        "Unknown",
+                        "Unknown",
+                        invoice.getAcademicYear(),
+                        invoice.getTotalFee(),
+                        invoice.getPaidAmount(),
+                        invoice.getOutstandingAmount(),
+                        invoice.getStatus(),
+                        null,
+                        null
+                    );
+                    result.add(dto);
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy danh sách hóa đơn: " + e.getMessage(), e);
         }
-        invoice.setPaidAmount(newPaidAmount);
-        invoice.setOutstandingAmount(debt);
-        invoice.setStatus(status);
-        invoiceRepository.save(invoice);
+    }
+
+    @Transactional(readOnly = true)
+    public InvoiceDetailDTO getInvoiceById(Integer invoiceId) {
+        try {
+            Invoice invoice = invoiceRepository.findById(invoiceId).orElse(null);
+            if (invoice == null) return null;
+
+            Student student = invoice.getStudent();
+            String studentName = (student != null && student.getAccount() != null) ? student.getAccount().getFullName() : "Unknown";
+            String className = "Unknown";
+
+            if (student != null) {
+                AtomicReference<String> tempClassName = new AtomicReference<>("Unknown");
+                studentClassRepository.findByStudentAndAcademicYear(student, invoice.getAcademicYear())
+                    .ifPresent(sc -> {
+                        if (sc.getClazz() != null) {
+                            tempClassName.set(sc.getClazz().getClassName());
+                        }
+                    });
+                className = tempClassName.get();
+            }
+
+            LocalDate lastPaymentDate = paymentReceiptRepository
+                .findTopByInvoiceId(invoiceId)
+                .map(PaymentReceipt::getPaymentDate)
+                .orElse(null);
+
+            return new InvoiceDetailDTO(
+                invoice.getId(),
+                student != null ? student.getId() : null,
+                studentName,
+                className,
+                invoice.getAcademicYear(),
+                invoice.getTotalFee(),
+                invoice.getPaidAmount(),
+                invoice.getOutstandingAmount(),
+                invoice.getStatus(),
+                lastPaymentDate,
+                null
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy chi tiết hóa đơn: " + e.getMessage(), e);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -93,18 +206,14 @@ public class PaymentReceiptService {
         for (Invoice invoice : invoices) {
             PaymentRecordDTO dto = new PaymentRecordDTO();
             dto.setInvoiceId(invoice.getId());
-            dto.setStudentId(invoice.getStudent().getId());
+            dto.setStudentId(invoice.getStudent() != null ? invoice.getStudent().getId() : null);
             Student student = invoice.getStudent();
-            if (student != null && student.getAccount() != null) {
-                dto.setStudentName(student.getAccount().getFullName());
-            } else {
-                dto.setStudentName("Unknown");
-            }
+            dto.setStudentName((student != null && student.getAccount() != null) ? student.getAccount().getFullName() : "Unknown");
             dto.setAcademicYear(invoice.getAcademicYear());
             dto.setTotalFee(invoice.getTotalFee());
             dto.setPaidAmount(invoice.getPaidAmount());
             dto.setOutstandingAmount(invoice.getOutstandingAmount());
-            dto.setStatus(invoice.getStatus()); 
+            dto.setStatus(invoice.getStatus());
             records.add(dto);
         }
         return records;
@@ -118,7 +227,7 @@ public class PaymentReceiptService {
 
         Map<String, Invoice> currentStudentInvoices = currentYearInvoices.stream()
                 .collect(Collectors.toMap(
-                        invoice -> invoice.getStudent().getId(),
+                        invoice -> invoice.getStudent() != null ? invoice.getStudent().getId() : "",
                         invoice -> invoice,
                         (existing, replacement) -> existing.getId() > replacement.getId() ? existing : replacement
                 ));
@@ -130,7 +239,7 @@ public class PaymentReceiptService {
 
         Map<String, Invoice> previousStudentInvoices = previousYearInvoices.stream()
                 .collect(Collectors.toMap(
-                        invoice -> invoice.getStudent().getId(),
+                        invoice -> invoice.getStudent() != null ? invoice.getStudent().getId() : "",
                         invoice -> invoice,
                         (existing, replacement) -> existing.getId() > replacement.getId() ? existing : replacement
                 ));
