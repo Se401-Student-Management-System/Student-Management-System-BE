@@ -18,5 +18,5 @@ public class ViolationType {
     private String violationName;
 
     @Column(name = "deducted_points")
-    private Float deductedPoints;
+    private Double deductedPoints;
 }
