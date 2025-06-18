@@ -22,7 +22,7 @@ public class ViolationRequest {
     @NotBlank(message = "Class Name cannot be empty")
     private String className;
 
-    private Integer supervisorId;
+    private String supervisorId;
 
     @NotNull(message = "Violation Type ID cannot be null")
     private Integer violationTypeId;
