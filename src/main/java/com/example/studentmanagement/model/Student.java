@@ -145,34 +145,16 @@ public class Student implements GradeInterface, UserEntity {
         return currentState;
     }
 
-    public void performStudy() {
-        if (this.currentState == null) setInitialState();
-        this.currentState.study(this);
-    }
-
-    public void performSuspend() {
-        if (this.currentState == null) setInitialState();
-        this.currentState.suspend(this);
-    }
-
     public void performWarn() {
-        if (this.currentState == null) setInitialState();
+        if (this.currentState == null)
+            setInitialState();
         this.currentState.warn(this);
     }
 
-    public void performActivate() {
-        if (this.currentState == null) setInitialState();
-        this.currentState.activate(this);
-    }
-
     public void performEnroll() {
-        if (this.currentState == null) setInitialState();
+        if (this.currentState == null)
+            setInitialState();
         this.currentState.enroll(this);
-    }
-
-    public void performLeave() {
-        if (this.currentState == null) setInitialState();
-        this.currentState.leave(this);
     }
 
     public ActiveState getActiveState() {

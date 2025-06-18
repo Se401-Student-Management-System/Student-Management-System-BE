@@ -35,8 +35,7 @@ public class MajorViolationStrategy implements ViolationHandlingStrategy {
         // Logic trừ điểm
         if (deductedPoints != null && deductedPoints > 0) {
             Optional<Behavior> behaviorOptional = behaviorRepository.findByStudentAndAcademicYearAndSemester(
-                    student, violation.getAcademicYear(), violation.getSemester()
-            );
+                    student, violation.getAcademicYear(), violation.getSemester());
 
             Behavior behavior;
             if (behaviorOptional.isPresent()) {
@@ -66,18 +65,22 @@ public class MajorViolationStrategy implements ViolationHandlingStrategy {
         String adminEmail = "admin@school.com";
         String recipients = studentEmail + "," + adminEmail; // Gửi đến nhiều người
         String subject = "[KHẨN CẤP] Vi phạm nghiêm trọng của học sinh " + studentFullName;
-        String customMessage = "Chúng tôi xin thông báo rằng học sinh " + studentFullName + " đã có hành vi vi phạm RẤT NGHIÊM TRỌNG: " + violationTypeName + ". Sự việc này yêu cầu hành động kỷ luật nghiêm khắc từ phía nhà trường.";
+        String customMessage = "Chúng tôi xin thông báo rằng học sinh " + studentFullName
+                + " đã có hành vi vi phạm RẤT NGHIÊM TRỌNG: " + violationTypeName
+                + ". Sự việc này yêu cầu hành động kỷ luật nghiêm khắc từ phía nhà trường.";
         String htmlBody = emailUtil.createWarningEmailBody(
-                studentFullName, violationTypeName, violation.getViolationDate(), customMessage
-        );
+                studentFullName, violationTypeName, violation.getViolationDate(), customMessage);
         emailUtil.sendHtmlEmail(recipients, subject, htmlBody);
         emailSent = true;
 
         // Chuyển trạng thái sinh viên sang "Nghỉ học" (INACTIVE)
         if (student.getStatus() != StudyStatus.INACTIVE) {
-            student.performLeave();
+            student.setCurrentState(student.getInactiveState());
             newStudentStatus = student.getStatus().name();
-            System.out.println("[Major] Student " + studentId + " status changed to " + newStudentStatus + ".");
+            System.out.println("[Major] Student " + studentId + " status forced to " + newStudentStatus
+                    + " due to major violation.");
+        } else {
+            System.out.println("[Major] Student " + studentId + " is already INACTIVE. No state change needed.");
         }
 
         return new ViolationResponse(
@@ -89,7 +92,6 @@ public class MajorViolationStrategy implements ViolationHandlingStrategy {
                 newBehaviorScore,
                 newStudentStatus,
                 emailSent,
-                "Major"
-        );
+                "Major");
     }
 }
