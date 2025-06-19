@@ -202,6 +202,7 @@ public class ScoreService {
 
     private Map<String, String> checkScoreStatus(Assignment assignment, Integer semester, String academicYear, String[] examNames) {
         Map<String, String> status = new HashMap<>();
+
         Class clazz = assignment.getClazz();
         Subject subject = assignment.getSubject();
 
@@ -216,17 +217,23 @@ public class ScoreService {
                     .map(StudentClass::getStudent)
                     .map(Student::getId)
                     .map(studentId -> scoreRepository.findByStudentIdAndSubjectIdAndSemesterAndAcademicYear(
-                            studentId, subject.getId(), semester, academicYear))
+                    studentId, subject.getId(), semester, academicYear))
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .filter(score -> {
                         switch (examName) {
-                            case "score15m1": return score.getScore15m1() == null;
-                            case "score15m2": return score.getScore15m2() == null;
-                            case "score1h1": return score.getScore1h1() == null;
-                            case "score1h2": return score.getScore1h2() == null;
-                            case "finalScore": return score.getFinalScore() == null;
-                            default: return false;
+                            case "score15m1":
+                                return score.getScore15m1() == null;
+                            case "score15m2":
+                                return score.getScore15m2() == null;
+                            case "score1h1":
+                                return score.getScore1h1() == null;
+                            case "score1h2":
+                                return score.getScore1h2() == null;
+                            case "finalScore":
+                                return score.getFinalScore() == null;
+                            default:
+                                return false;
                         }
                     })
                     .count();
@@ -238,7 +245,7 @@ public class ScoreService {
     }
 
     public List<ScoreInputDetailDTO> getScoreInputDetail(String teacherId, String className, String subjectName,
-                                                         Integer semester, String academicYear) {
+            Integer semester, String academicYear) {
         List<Score> scores = scoreRepository.findScoreInputDetail(teacherId, className, subjectName, semester, academicYear);
 
         List<ScoreInputDetailDTO> result = new ArrayList<>();
@@ -260,13 +267,25 @@ public class ScoreService {
 
     private Float calculateAverageScore(Score score) {
         List<Float> validScores = new ArrayList<>();
-        if (score.getScore15m1() != null) validScores.add(score.getScore15m1());
-        if (score.getScore15m2() != null) validScores.add(score.getScore15m2());
-        if (score.getScore1h1() != null) validScores.add(score.getScore1h1());
-        if (score.getScore1h2() != null) validScores.add(score.getScore1h2());
-        if (score.getFinalScore() != null) validScores.add(score.getFinalScore());
+        if (score.getScore15m1() != null) {
+            validScores.add(score.getScore15m1());
+        }
+        if (score.getScore15m2() != null) {
+            validScores.add(score.getScore15m2());
+        }
+        if (score.getScore1h1() != null) {
+            validScores.add(score.getScore1h1());
+        }
+        if (score.getScore1h2() != null) {
+            validScores.add(score.getScore1h2());
+        }
+        if (score.getFinalScore() != null) {
+            validScores.add(score.getFinalScore());
+        }
 
-        if (validScores.isEmpty()) return null;
+        if (validScores.isEmpty()) {
+            return null;
+        }
         float sum = 0;
         for (Float s : validScores) {
             sum += s;

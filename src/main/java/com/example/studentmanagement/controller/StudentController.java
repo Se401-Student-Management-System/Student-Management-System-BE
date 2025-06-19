@@ -6,6 +6,7 @@ import com.example.studentmanagement.dto.student.AssignClassRequest;
 import com.example.studentmanagement.dto.student.StudentDTO;
 import com.example.studentmanagement.dto.student.UpdateStudentRequest;
 import com.example.studentmanagement.service.student.StudentService;
+import com.example.studentmanagement.designpattern.templatemethod.TeacherGradeReport;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,12 +14,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/students")
 @RequiredArgsConstructor
 public class StudentController {
+
     private final StudentService studentService;
+    private final TeacherGradeReport teacherGradeReport;
 
     // STATE
     @PutMapping("/{id}")
@@ -89,7 +93,6 @@ public class StudentController {
     // @Autowired
     // private com.example.studentmanagement.repository.ScoreRepository
     // scoreRepository;
-
     // @GetMapping("/by-teacher/{teacherId}")
     // public ResponseEntity<List<StudentDTO>> getStudentsByTeacher(@PathVariable
     // String teacherId) {
@@ -97,7 +100,6 @@ public class StudentController {
     // scoreRepository.findStudentDTOsByTeacherId(teacherId);
     // return ResponseEntity.ok(students);
     // }
-
     // @GetMapping("/by-subject")
     // public ResponseEntity<List<StudentDTO>> getStudentsBySubject(
     // @RequestParam String subjectId,
@@ -108,15 +110,21 @@ public class StudentController {
     // academicYear, semester);
     // return ResponseEntity.ok(students);
     // }
-
     @GetMapping("/by-class-and-subject")
     public ResponseEntity<List<StudentDTO>> getStudentsByClassAndSubject(
             @RequestParam String className,
             @RequestParam String subjectId,
             @RequestParam String academicYear,
             @RequestParam int semester) {
-        List<StudentDTO> students = studentService.findStudentsByClassAndSubject(className, subjectId, academicYear,
-                semester);
+        Map<String, Object> params = Map.of(
+                "className", className,
+                "subjectId", subjectId,
+                "academicYear", academicYear,
+                "semester", semester
+        );
+        Object result = teacherGradeReport.generateReport(params);
+        @SuppressWarnings("unchecked")
+        List<StudentDTO> students = (List<StudentDTO>) result;
         return ResponseEntity.ok(students);
     }
 }
