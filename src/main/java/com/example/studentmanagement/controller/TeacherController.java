@@ -1,3 +1,4 @@
+
 package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.dto.teacher.ScoreInputDetailDTO;
@@ -6,6 +7,7 @@ import com.example.studentmanagement.dto.teacher.SubjectDTO;
 import com.example.studentmanagement.model.Score;
 import com.example.studentmanagement.model.Teacher;
 import com.example.studentmanagement.repository.TeacherRepository;
+import com.example.studentmanagement.service.director.StudentPaymentService;
 import com.example.studentmanagement.service.teacher.ScoreService;
 import com.example.studentmanagement.service.teacher.TeacherEvaluationService;
 import com.example.studentmanagement.service.teacher.TeacherService;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/teacher")
@@ -33,6 +36,9 @@ public class TeacherController {
     
     @Autowired
     private TeacherEvaluationService evaluationService;
+
+    @Autowired
+    private StudentPaymentService studentPaymentService;
 
     @PostMapping("/enter-scores")
     public ResponseEntity<?> enterScores(@RequestBody ScoreRequest scoreRequest) {
@@ -126,6 +132,22 @@ public class TeacherController {
         }
     }
     
+    // API lấy danh sách năm học
+    @GetMapping("/years")
+    public ResponseEntity<List<String>> getYearList() {
+        List<String> years = studentPaymentService.getYearList();
+        return ResponseEntity.ok(years);
+    }
+
+    // API lấy danh sách lớp học
+    @GetMapping("/classes")
+    public ResponseEntity<List<String>> getClassList(
+            @RequestParam(value = "year", required = false) String year) {
+        // Nếu muốn lọc theo năm học, có thể sửa lại service cho phù hợp
+        List<String> classes = studentPaymentService.getClassList();
+        return ResponseEntity.ok(classes);
+    }
+
     private Teacher getCurrentTeacher() {
         Optional<Teacher> teacher = teacherRepository.findById("GV001");
         return teacher.orElseThrow(() -> new IllegalArgumentException("Giáo viên GV001 không tồn tại trong database"));

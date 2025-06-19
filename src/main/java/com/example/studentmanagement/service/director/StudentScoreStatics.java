@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class StudentScoreStatics {
-    
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -39,7 +39,7 @@ public class StudentScoreStatics {
         return ((double) (currentCount - previousCount) / previousCount) * 100.0;
     }
 
-private Double calculateAverageScore(List<Score> scores) {
+    private Double calculateAverageScore(List<Score> scores) {
         if (scores == null || scores.isEmpty()) {
             return null;
         }
@@ -48,9 +48,9 @@ private Double calculateAverageScore(List<Score> scores) {
         int validSubjects = 0;
 
         for (Score score : scores) {
-            if (score.getScore15m1() == null || score.getScore15m2() == null ||
-                score.getScore1h1() == null || score.getScore1h2() == null || 
-                score.getFinalScore() == null) {
+            if (score.getScore15m1() == null || score.getScore15m2() == null
+                    || score.getScore1h1() == null || score.getScore1h2() == null
+                    || score.getFinalScore() == null) {
                 return null;
             }
 
@@ -61,9 +61,9 @@ private Double calculateAverageScore(List<Score> scores) {
                 BigDecimal score1h2 = BigDecimal.valueOf(score.getScore1h2());
                 BigDecimal finalScore = BigDecimal.valueOf(score.getFinalScore());
 
-                if (score15m1.compareTo(BigDecimal.ZERO) < 0 || score15m2.compareTo(BigDecimal.ZERO) < 0 ||
-                    score1h1.compareTo(BigDecimal.ZERO) < 0 || score1h2.compareTo(BigDecimal.ZERO) < 0 ||
-                    finalScore.compareTo(BigDecimal.ZERO) < 0) {
+                if (score15m1.compareTo(BigDecimal.ZERO) < 0 || score15m2.compareTo(BigDecimal.ZERO) < 0
+                        || score1h1.compareTo(BigDecimal.ZERO) < 0 || score1h2.compareTo(BigDecimal.ZERO) < 0
+                        || finalScore.compareTo(BigDecimal.ZERO) < 0) {
                     return null;
                 }
 
@@ -83,8 +83,8 @@ private Double calculateAverageScore(List<Score> scores) {
             return null;
         }
         BigDecimal avg = total.divide(BigDecimal.valueOf(validSubjects), 2, RoundingMode.HALF_UP)
-                             .setScale(1, RoundingMode.HALF_UP);
-                             
+                .setScale(1, RoundingMode.HALF_UP);
+
         return avg.doubleValue();
     }
 
@@ -95,7 +95,9 @@ private Double calculateAverageScore(List<Score> scores) {
         for (Student student : students) {
             List<Score> scores = scoreRepository.findScoresByStudentAndSemester(student.getId(), semester, academicYear);
             Double avg = calculateAverageScore(scores);
-            if (avg != null && avg >= min && avg < max) count++;
+            if (avg != null && avg >= min && avg < max) {
+                count++;
+            }
         }
         return count;
     }
@@ -170,5 +172,20 @@ private Double calculateAverageScore(List<Score> scores) {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public Map<String, Object> getGradeOverview(int grade, int semester, String academicYear) {
+        Map<String, Object> overview = new HashMap<>();
+        // Thống kê số lượng học sinh giỏi
+        overview.putAll(getGoodGradeStatistics(grade, semester, academicYear));
+        // Thống kê số lượng học sinh khá
+        overview.putAll(getNormalGradeStatistics(grade, semester, academicYear));
+        // Thống kê số lượng học sinh trung bình
+        overview.putAll(getMediumGradeStatistics(grade, semester, academicYear));
+        // Thống kê số lượng học sinh yếu
+        overview.putAll(getWeakGradeStatistics(grade, semester, academicYear));
+        // Top 10 học sinh điểm cao nhất
+        overview.put("topTen", getTopTenStudents(grade, semester, academicYear));
+        return overview;
     }
 }

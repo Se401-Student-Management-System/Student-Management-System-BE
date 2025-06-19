@@ -1,3 +1,4 @@
+
 package com.example.studentmanagement.service.director;
 
 import com.example.studentmanagement.dto.director.StudentPaymentDTO;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @Service
 public class StudentPaymentService {
@@ -54,15 +57,15 @@ public class StudentPaymentService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Class not found: " + className));
 
-        String sql = "SELECT i.student_id, a.full_name, c.class_name, i.academic_year, " +
-                     "i.total_fee, i.paid_amount, i.outstanding_amount, i.status " +
-                     "FROM invoice i " +
-                     "JOIN student s ON i.student_id = s.id " +
-                     "JOIN account a ON s.account_id = a.id " +
-                     "JOIN student_class sc ON s.id = sc.student_id AND sc.academic_year = :academicYear " +
-                     "JOIN class c ON sc.class_id = c.id " +
-                     "WHERE sc.class_id = :classId AND i.academic_year = :academicYear";
-        
+        String sql = "SELECT i.student_id, a.full_name, c.class_name, i.academic_year, "
+                + "i.total_fee, i.paid_amount, i.outstanding_amount, i.status "
+                + "FROM invoice i "
+                + "JOIN student s ON i.student_id = s.id "
+                + "JOIN account a ON s.account_id = a.id "
+                + "JOIN student_class sc ON s.id = sc.student_id AND sc.academic_year = :academicYear "
+                + "JOIN class c ON sc.class_id = c.id "
+                + "WHERE sc.class_id = :classId AND i.academic_year = :academicYear";
+
         @SuppressWarnings("unchecked")
         List<Object[]> results = entityManager.createNativeQuery(sql)
                 .setParameter("classId", clazz.getId())
