@@ -276,4 +276,15 @@ public class StudentService {
         }
         return result;
     }
+
+    public StudentDTO getStudentById(String id) {
+        // Tìm kiếm sinh viên theo ID
+        Optional<Student> studentOptional = studentRepository.findById(id);
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
+            return enrichStudentDTOWithClassInfo(studentConverter.toDto(student), student);
+        } else {
+            throw new IllegalArgumentException("Student not found with ID: " + id);
+        }
+    }
 }

@@ -16,9 +16,8 @@ public class InactiveState extends AbstractStudentState {
 
     @Override
     public void warn(Student student) {
-        System.out.println(
-                "Student " + student.getId() + " is inactive. Cannot be warned directly (unless special case).");
-        // Không làm gì hoặc ném lỗi nếu không cho phép cảnh cáo khi Inactive
+        System.out.println("Student " + student.getId() + " is warned. Moving to Warning state.");
+        student.setCurrentState(student.getWarningState()); // Chuyển sang Warning
     }
 
     @Override

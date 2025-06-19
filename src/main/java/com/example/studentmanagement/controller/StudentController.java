@@ -119,4 +119,18 @@ public class StudentController {
                 semester);
         return ResponseEntity.ok(students);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getStudentById(@PathVariable String id) {
+        try {
+            StudentDTO student = studentService.getStudentById(id);
+            if (student == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy sinh viên với id: " + id);
+            }
+            return ResponseEntity.ok(student);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Lỗi hệ thống khi lấy thông tin sinh viên: " + e.getMessage());
+        }
+    }
 }
