@@ -1,6 +1,5 @@
 package com.example.studentmanagement.controller;
 
-import com.example.studentmanagement.designpattern.templatemethod.SupervisorConductReport;
 import com.example.studentmanagement.designpattern.templatemethod.SupervisorBehaviorSummaryReport;
 import com.example.studentmanagement.designpattern.templatemethod.TeacherGradeReport;
 
@@ -18,9 +17,6 @@ import com.example.studentmanagement.service.supervisor.StudentBehaviorSummarySe
 @RestController
 @RequestMapping("/supervisor")
 public class SupervisorController {
-
-    @Autowired
-    private SupervisorConductReport supervisorConductReport;
 
     @Autowired
     private TeacherGradeReport teacherGradeReport;
@@ -43,21 +39,6 @@ public class SupervisorController {
                 "academicYear", academicYear
         );
         Object result = teacherGradeReport.generateReport(params);
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/supervisor-conduct")
-    public ResponseEntity<?> getSupervisorConductReport(
-            @RequestParam int grade,
-            @RequestParam int semester,
-            @RequestParam String academicYear
-    ) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("grade", grade);
-        params.put("semester", semester);
-        params.put("academicYear", academicYear);
-
-        Object result = supervisorConductReport.generateReport(params);
         return ResponseEntity.ok(result);
     }
 
