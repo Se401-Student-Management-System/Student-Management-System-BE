@@ -120,8 +120,7 @@ public class StudentController {
                 "className", className,
                 "subjectId", subjectId,
                 "academicYear", academicYear,
-                "semester", semester
-        );
+                "semester", semester);
         Object result = teacherGradeReport.generateReport(params);
         @SuppressWarnings("unchecked")
         List<StudentDTO> students = (List<StudentDTO>) result;
@@ -141,4 +140,22 @@ public class StudentController {
                     .body("Lỗi hệ thống khi lấy thông tin sinh viên: " + e.getMessage());
         }
     }
+
+    @GetMapping("/by-class")
+    public ResponseEntity<?> getStudentsByClassAndAcademicYear(
+            @RequestParam String className,
+            @RequestParam String academicYear) {
+        try {
+            List<StudentDTO> students = studentService.getStudentsByClassAndAcademicYear(className, academicYear);
+            if (students.isEmpty()) {
+                return ResponseEntity.noContent().build(); // HTTP 204 nếu không tìm thấy học sinh nào
+            }
+            return ResponseEntity.ok(students);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Internal error: " + e.getMessage());
+        }
+    }
+
 }

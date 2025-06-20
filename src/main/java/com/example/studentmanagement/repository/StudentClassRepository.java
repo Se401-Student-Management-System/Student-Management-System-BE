@@ -23,7 +23,8 @@ public interface StudentClassRepository extends JpaRepository<StudentClass, Inte
 
     // Tìm danh sách StudentClass theo tên lớp và năm học
     @Query("SELECT sc FROM StudentClass sc WHERE sc.clazz.className = :className AND sc.academicYear = :academicYear")
-    List<StudentClass> findByClassNameAndAcademicYear(@Param("className") String className, @Param("academicYear") String academicYear);
+    List<StudentClass> findByClassNameAndAcademicYear(@Param("className") String className,
+            @Param("academicYear") String academicYear);
 
     Optional<StudentClass> findByStudentAndClazzAndAcademicYear(Student student, Class clazz, String academicYear);
 
@@ -34,4 +35,6 @@ public interface StudentClassRepository extends JpaRepository<StudentClass, Inte
     // List<StudentClass> findByClazz_Id(String classId);
     @Query("SELECT sc FROM StudentClass sc WHERE sc.clazz.id = :classId AND sc.academicYear = :academicYear")
     List<StudentClass> findByClassIdAndAcademicYear(Integer classId, String academicYear);
+
+    List<StudentClass> findByClazzAndAcademicYear(Class clazz, String academicYear);
 }

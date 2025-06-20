@@ -287,4 +287,17 @@ public class StudentService {
             throw new IllegalArgumentException("Student not found with ID: " + id);
         }
     }
+
+    @Transactional(readOnly = true)
+    public List<StudentDTO> getStudentsByClassAndAcademicYear(String className, String academicYear) {
+        Class clazz = classRepository.findByClassName(className)
+                .orElseThrow(() -> new IllegalArgumentException("Class not found with name: " + className));
+
+        List<StudentClass> studentClasses = studentClassRepository.findByClazzAndAcademicYear(clazz, academicYear);
+
+        return studentClasses.stream()
+                .map(sc -> enrichStudentDTOWithClassInfo(studentConverter.toDto(sc.getStudent()), sc.getStudent()))
+                .collect(Collectors.toList());
+    }
+
 }
