@@ -73,14 +73,16 @@ public class MajorViolationStrategy implements ViolationHandlingStrategy {
         emailUtil.sendHtmlEmail(recipients, subject, htmlBody);
         emailSent = true;
 
-        // Chuyển trạng thái sinh viên sang "Nghỉ học" (INACTIVE)
-        if (student.getStatus() != StudyStatus.INACTIVE) {
-            student.setCurrentState(student.getInactiveState());
-            newStudentStatus = student.getStatus().name();
-            System.out.println("[Major] Student " + studentId + " status forced to " + newStudentStatus
-                    + " due to major violation.");
-        } else {
-            System.out.println("[Major] Student " + studentId + " is already INACTIVE. No state change needed.");
+        // Chuyển trạng thái sinh viên sang "CẢNH BÁO"
+        String initialStudentStatus = student.getStatus().name();
+        if (newBehaviorScore < 50) {
+            student.performWarn();
+            if (!student.getStatus().name().equals(initialStudentStatus)) {
+                System.out.println("[Major] Student " + studentId + " status forced to " + newStudentStatus
+                        + " due to major violation.");
+            } else {
+                System.out.println("[Major] Student " + studentId + " is already   WARNING. No state change needed.");
+            }
         }
 
         return new ViolationResponse(
