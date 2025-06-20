@@ -1,4 +1,3 @@
-package com.example.studentmanagement.controller;
 
 import com.example.studentmanagement.designpattern.templatemethod.SupervisorBehaviorSummaryReport;
 import com.example.studentmanagement.designpattern.templatemethod.TeacherGradeReport;
@@ -8,16 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
+
 import java.util.Map;
 
 import com.example.studentmanagement.service.director.StudentConductStatics;
 
-import com.example.studentmanagement.service.supervisor.StudentBehaviorSummaryService;
 
-@RestController
+
 @RequestMapping("/supervisor")
 public class SupervisorController {
-
     @Autowired
     private TeacherGradeReport teacherGradeReport;
 
@@ -56,4 +55,19 @@ public class SupervisorController {
         Object result = supervisorBehaviorSummaryReport.generateReport(params);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/supervisor-conduct")
+    public ResponseEntity<List<Map<String, Object>>> getSupervisorConductReport(
+            @RequestParam int semester,
+            @RequestParam String academicYear,
+        
+            @RequestParam int grade
+    ) {
+        List<Map<String, Object>> list = studentConductStatics.getViolationList(semester, academicYear, grade);
+        return ResponseEntity.ok(list);
+    }
+    
 }
+
+    
+        

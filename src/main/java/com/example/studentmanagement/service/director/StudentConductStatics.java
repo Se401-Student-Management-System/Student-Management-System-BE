@@ -4,9 +4,10 @@ import com.example.studentmanagement.dto.director.ConductStatisticDTO;
 import com.example.studentmanagement.dto.director.LowestConductStudentDTO;
 import com.example.studentmanagement.dto.supervisor.StudentBehaviorSummaryDTO;
 import com.example.studentmanagement.model.Student;
+import com.example.studentmanagement.model.StudentClass;
+import com.example.studentmanagement.model.Violation;
 import com.example.studentmanagement.repository.BehaviorRepository;
 import com.example.studentmanagement.repository.StudentClassRepository;
-
 import com.example.studentmanagement.repository.StudentRepository;
 import com.example.studentmanagement.repository.ViolationRepository;
 import jakarta.persistence.EntityManager;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class StudentConductStatics {
@@ -228,4 +230,36 @@ public class StudentConductStatics {
         }
         return list;
     }
+
+    public List<Map<String, Object>> getViolationList(int semester, String academicYear, int grade) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        // Lấy tất cả vi phạm theo học kỳ, năm học
+        List<Violation> violations = violationRepository.findAll();
+        for (Violation v : violations) {
+            // Lọc theo học kỳ, năm học
+            if (v.getSemester() != null && v.getSemester() == semester
+                    && academicYear.equals(v.getAcademicYear())) {
+                Student student = v.getStudent();
+                // Lấy className đúng năm học và đúng khối
+                Optional<StudentClass> scOpt = studentClassRepository.findByStudentIdAndAcademicYear(student.getId(), academicYear);
+                if (scOpt.isPresent()) {
+                    String className = scOpt.get().getClazz().getClassName();
+                    if (className.startsWith(String.valueOf(grade))) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", v.getId());
+                        map.put("studentId", student.getId());
+                        map.put("fullName", student.getAccount().getFullName());
+                        map.put("className", className);
+                        // Lấy thông tin lỗi vi phạm và điểm trừ từ ViolationType
+                        map.put("faultDetail", v.getViolationType() != null ? v.getViolationType().getViolationName() : "");
+                        map.put("minusPoint", v.getViolationType() != null ? v.getViolationType().getDeductedPoints() : 0);
+                        result.add(map);
+                    }
+                }
+            }
+        }
+        return result;
+        
+    }
+
 }
